@@ -1,6 +1,6 @@
 {
   "name": "react-native-axeptio-sdk",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Axeptio react native sdk for presenting cookies consent to the user",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",

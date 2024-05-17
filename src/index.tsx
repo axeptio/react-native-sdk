@@ -6,7 +6,7 @@ const LINKING_ERROR =
   '- You rebuilt the app after installing the package\n' +
   '- You are not using Expo Go\n';
 
-const AxeptioSdk = NativeModules.AxeptioSdk
+const AxeptioSdkNative = NativeModules.AxeptioSdk
   ? NativeModules.AxeptioSdk
   : new Proxy(
       {},
@@ -17,6 +17,40 @@ const AxeptioSdk = NativeModules.AxeptioSdk
       }
     );
 
-export function multiply(a: number, b: number): Promise<number> {
-  return AxeptioSdk.multiply(a, b);
+export default class AxeptioSdk {
+  static initialize(
+    clientId: string,
+    cookiesVersion: string,
+    token?: string
+  ): Promise<void> {
+    return AxeptioSdkNative.initialize(clientId, cookiesVersion, token ?? '');
+  }
+
+  static getPlaformVersion(): Promise<string> {
+    return AxeptioSdkNative.getPlaformVersion();
+  }
+
+  static getAxeptioToken(): Promise<string> {
+    return AxeptioSdkNative.getAxeptioToken();
+  }
+
+  static setupUI(): Promise<void> {
+    return AxeptioSdkNative.setupUI();
+  }
+
+  static setUserDeniedTracking(): Promise<void> {
+    return AxeptioSdkNative.setUserDeniedTracking();
+  }
+
+  static showConsentScreen(): Promise<void> {
+    return AxeptioSdkNative.showConsentScreen();
+  }
+
+  static clearConsent(): Promise<void> {
+    return AxeptioSdkNative.clearConsent();
+  }
+
+  static appendAxeptioTokenURL(url: string, token: string): Promise<string> {
+    return AxeptioSdkNative.appendAxeptioTokenURL(url, token);
+  }
 }

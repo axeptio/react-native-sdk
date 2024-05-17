@@ -1,18 +1,47 @@
-import * as React from 'react';
+import React, { useEffect, useState } from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-axeptio-sdk';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import AxeptioSDK from 'react-native-axeptio-sdk';
+import { TokenModal } from './TokenModal';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
+  const [tokenModalVisible, setTokenModalVisible] = useState(false);
 
-  React.useEffect(() => {
-    multiply(3, 7).then(setResult);
+  useEffect(() => {
+    async function init() {
+      await AxeptioSDK.initialize(
+        '5fbfa806a0787d3985c6ee5f',
+        'google cmp partner program sandbox-en-EU'
+      );
+      await AxeptioSDK.setupUI();
+    }
+    init();
   }, []);
 
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Pressable
+        style={styles.button}
+        onPress={() => AxeptioSDK.showConsentScreen()}
+      >
+        <Text style={styles.label}>Consent popup</Text>
+      </Pressable>
+      <Pressable
+        style={[styles.button, styles.clearButton]}
+        onPress={() => AxeptioSDK.clearConsent()}
+      >
+        <Text style={styles.label}>Clear consent</Text>
+      </Pressable>
+      <Pressable
+        style={styles.button}
+        onPress={() => setTokenModalVisible(true)}
+      >
+        <Text style={styles.label}>Show webview with token</Text>
+      </Pressable>
+      <TokenModal
+        modalVisible={tokenModalVisible}
+        setModalVisible={setTokenModalVisible}
+      />
     </View>
   );
 }
@@ -22,10 +51,22 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(253, 247, 231, 1)',
   },
-  box: {
-    width: 60,
-    height: 60,
-    marginVertical: 20,
+  button: {
+    margin: 8,
+    padding: 12,
+    backgroundColor: 'rgba(247, 209, 94, 1)',
+    borderRadius: 999,
+    maxWidth: 320,
+    width: '100%',
+  },
+  clearButton: {
+    backgroundColor: 'rgba(205, 97, 91, 1)',
+  },
+  label: {
+    textAlign: 'center',
+    fontSize: 16,
+    color: '#000',
   },
 });
