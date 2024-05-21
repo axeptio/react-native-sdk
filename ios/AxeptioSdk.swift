@@ -1,18 +1,53 @@
 import AxeptioSDK
 
 @objc(AxeptioSdk)
-class AxeptioSdk: NSObject {
+class AxeptioSdk: RCTEventEmitter {
+
+    private let axeptioEventListener = AxeptioEventListener()
+
+    override init() {
+        super.init()
+
+        axeptioEventListener.onPopupClosedEvent = { [weak self] in
+            guard let self else { return }
+            self.sendEvent(withName: "onPopupClosedEvent", body: nil)
+        }
+
+        axeptioEventListener.onConsentChanged = { [weak self] in
+            guard let self else { return }
+            self.sendEvent(withName: "onConsentChanged", body: nil)
+        }
+
+        axeptioEventListener.onGoogleConsentModeUpdate = { [weak self] consents in
+            guard let self else { return }
+            self.sendEvent(withName: "onGoogleConsentModeUpdate", body: consents.toJSObject())
+        }
+
+        Axeptio.shared.setEventListener(axeptioEventListener)
+    }
+
+    deinit {
+        Axeptio.shared.removeEventListener(axeptioEventListener)
+    }
+
+    @objc open override func supportedEvents() -> [String] {
+        return [
+            "onPopupClosedEvent",
+            "onConsentChanged",
+            "onGoogleConsentModeUpdate",
+        ]
+    }
 
     @objc(getPlaformVersion:withRejecter:)
     func getPlaformVersion(
       resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
         ) -> Void {
-          resolve("iOS")
+          resolve("iOS" + UIDevice.current.systemVersion)
         }
 
     @objc(getAxeptioToken:withRejecter:)
-    func axeptioToken(
+    func getAxeptioToken(
         resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
@@ -86,4 +121,15 @@ class AxeptioSdk: NSObject {
         resolve(result.absoluteString)
     }
 
+}
+
+extension GoogleConsentV2 {
+    func toJSObject() -> Dictionary<String, Any> {
+        var js: [String: Any] = [:]
+        js["analyticsStorage"] = self.analyticsStorage == GoogleConsentStatus.granted ? true : false
+        js["adStorage"] = self.adStorage == GoogleConsentStatus.granted ? true : false
+        js["adUserData"] = self.adUserData == GoogleConsentStatus.granted ? true : false
+        js["adPersonalization"] = self.adPersonalization == GoogleConsentStatus.granted ? true : false
+        return js
+    }
 }

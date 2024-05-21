@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import AxeptioSDK from 'react-native-axeptio-sdk';
+import AxeptioSDK, {
+  type AxeptioEventListener,
+} from 'react-native-axeptio-sdk';
 import { TokenModal } from './TokenModal';
 
 export default function App() {
@@ -9,10 +11,26 @@ export default function App() {
 
   useEffect(() => {
     async function init() {
+      const platform = await AxeptioSDK.getPlaformVersion();
+      console.log('Platform', platform);
       await AxeptioSDK.initialize(
         '5fbfa806a0787d3985c6ee5f',
         'google cmp partner program sandbox-en-EU'
       );
+
+      const listener: AxeptioEventListener = {
+        onPopupClosedEvent: () => {
+          console.log('onPopupClosedEvent');
+        },
+        onConsentChanged: () => {
+          console.log('onConsentChanged');
+        },
+        onGoogleConsentModeUpdate: (consents) => {
+          console.log('onGoogleConsentModeUpdate', consents);
+        },
+      };
+      AxeptioSDK.addListener(listener);
+
       await AxeptioSDK.setupUI();
     }
     init();

@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
 
 const LINKING_ERROR =
   `The package 'react-native-axeptio-sdk' doesn't seem to be linked. Make sure: \n\n` +
@@ -17,8 +17,28 @@ const AxeptioSdkNative = NativeModules.AxeptioSdk
       }
     );
 
-export default class AxeptioSdk {
-  static initialize(
+const EventEmitter = new NativeEventEmitter(AxeptioSdkNative);
+
+class AxeptioSdk {
+  private listeners: AxeptioEventListener[] = [];
+
+  constructor() {
+    Object.keys(AxeptioEvent).forEach((event) => {
+      EventEmitter.addListener(event, (body: any) => {
+        this.sendEvent(event as AxeptioEvent, body);
+      });
+    });
+  }
+
+  getPlaformVersion(): Promise<string> {
+    return AxeptioSdkNative.getPlaformVersion();
+  }
+
+  getAxeptioToken(): Promise<string> {
+    return AxeptioSdkNative.getAxeptioToken();
+  }
+
+  initialize(
     clientId: string,
     cookiesVersion: string,
     token?: string
@@ -26,31 +46,58 @@ export default class AxeptioSdk {
     return AxeptioSdkNative.initialize(clientId, cookiesVersion, token ?? '');
   }
 
-  static getPlaformVersion(): Promise<string> {
-    return AxeptioSdkNative.getPlaformVersion();
-  }
-
-  static getAxeptioToken(): Promise<string> {
-    return AxeptioSdkNative.getAxeptioToken();
-  }
-
-  static setupUI(): Promise<void> {
+  setupUI(): Promise<void> {
     return AxeptioSdkNative.setupUI();
   }
 
-  static setUserDeniedTracking(): Promise<void> {
+  setUserDeniedTracking(): Promise<void> {
     return AxeptioSdkNative.setUserDeniedTracking();
   }
 
-  static showConsentScreen(): Promise<void> {
+  showConsentScreen(): Promise<void> {
     return AxeptioSdkNative.showConsentScreen();
   }
 
-  static clearConsent(): Promise<void> {
+  clearConsent(): Promise<void> {
     return AxeptioSdkNative.clearConsent();
   }
 
-  static appendAxeptioTokenURL(url: string, token: string): Promise<string> {
+  appendAxeptioTokenURL(url: string, token: string): Promise<string> {
     return AxeptioSdkNative.appendAxeptioTokenURL(url, token);
   }
+
+  private sendEvent(name: AxeptioEvent, body: any) {
+    this.listeners.forEach((listener) => {
+      listener[name]?.(body);
+    });
+  }
+
+  addListener(listener: AxeptioEventListener) {
+    this.listeners.push(listener);
+  }
+
+  removeListeners() {
+    this.listeners = [];
+  }
 }
+
+enum AxeptioEvent {
+  onPopupClosedEvent = 'onPopupClosedEvent',
+  onConsentChanged = 'onConsentChanged',
+  onGoogleConsentModeUpdate = 'onGoogleConsentModeUpdate',
+}
+
+export type AxeptioEventListener = {
+  [AxeptioEvent.onPopupClosedEvent]?: () => void;
+  [AxeptioEvent.onConsentChanged]?: () => void;
+  [AxeptioEvent.onGoogleConsentModeUpdate]?: (consent: GoogleConsentV2) => void;
+};
+
+export type GoogleConsentV2 = {
+  adPersonalization: boolean;
+  adStorage: boolean;
+  adUserData: boolean;
+  analyticsStorage: boolean;
+};
+
+export default new AxeptioSdk();
