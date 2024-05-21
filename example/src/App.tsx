@@ -4,6 +4,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import AxeptioSDK, {
   type AxeptioEventListener,
 } from 'react-native-axeptio-sdk';
+import {
+  getTrackingStatus,
+  requestTrackingPermission,
+} from 'react-native-tracking-transparency';
 import { TokenModal } from './TokenModal';
 
 export default function App() {
@@ -31,7 +35,17 @@ export default function App() {
       };
       AxeptioSDK.addListener(listener);
 
-      await AxeptioSDK.setupUI();
+      let trackingStatus = await getTrackingStatus();
+
+      if (trackingStatus === 'not-determined') {
+        trackingStatus = await requestTrackingPermission();
+      }
+
+      if (trackingStatus === 'denied') {
+        await AxeptioSDK.setUserDeniedTracking();
+      } else {
+        await AxeptioSDK.setupUI();
+      }
     }
     init();
   }, []);

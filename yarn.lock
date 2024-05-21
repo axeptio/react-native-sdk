@@ -10851,6 +10851,7 @@ __metadata:
     babel-plugin-module-resolver: ^5.0.0
     react: 18.2.0
     react-native: 0.74.1
+    react-native-tracking-transparency: ^0.1.2
     react-native-webview: ^13.10.2
   languageName: unknown
   linkType: soft
@@ -10910,6 +10911,16 @@ __metadata:
   bin:
     bob: bin/bob
   checksum: 1bee701c21f28f10c5737c8000e7fd6d8f641cf46fe7de03f5086d9951d2c5f3cb45375e292519b85f44a28f907e37f6c7bff324cfb1913b3bee0cb4db2efeb7
+  languageName: node
+  linkType: hard
+
+"react-native-tracking-transparency@npm:^0.1.2":
+  version: 0.1.2
+  resolution: "react-native-tracking-transparency@npm:0.1.2"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 972706c14929c3c158cd47dc908ba1c448f482f64a9a1fb2087374b5fbc4124d54dd678de7094d6ad866a75415479e6a120d3cc7e39f338fee27ee214a4b902a
   languageName: node
   linkType: hard
 
