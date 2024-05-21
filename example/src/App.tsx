@@ -1,17 +1,56 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import AxeptioSDK, {
   type AxeptioEventListener,
 } from 'react-native-axeptio-sdk';
+import { AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
 import {
   getTrackingStatus,
   requestTrackingPermission,
 } from 'react-native-tracking-transparency';
 import { TokenModal } from './TokenModal';
 
+const adUnitId =
+  Platform.OS === 'ios'
+    ? 'ca-app-pub-3940256099942544/1033173712'
+    : 'ca-app-pub-3940256099942544/4411468910';
+// const interstitial = InterstitialAd.createForAdRequest(adUnitId);
+
 export default function App() {
   const [tokenModalVisible, setTokenModalVisible] = useState(false);
+  const [interstitial, setInterstitial] = useState<InterstitialAd>();
+  const [loaded, setLoaded] = useState(false);
+
+  const loadAd = useCallback(async () => {
+    setInterstitial(undefined);
+    const ad = await InterstitialAd.createForAdRequest(adUnitId);
+    setInterstitial(ad);
+  }, []);
+
+  useEffect(() => {
+    setLoaded(false);
+    if (!interstitial) {
+      return;
+    }
+    const unsubscribe = interstitial.addAdEventsListener(({ type }) => {
+      switch (type) {
+        case AdEventType.LOADED:
+          setLoaded(true);
+          break;
+        case AdEventType.ERROR:
+          setLoaded(false);
+          break;
+        case AdEventType.CLOSED:
+          // Reload ad when closed
+          loadAd();
+          break;
+      }
+    });
+    interstitial.load();
+
+    return unsubscribe;
+  }, [interstitial, loadAd]);
 
   useEffect(() => {
     async function init() {
@@ -24,17 +63,21 @@ export default function App() {
 
       const listener: AxeptioEventListener = {
         onPopupClosedEvent: () => {
-          console.log('onPopupClosedEvent');
+          // The CMP notice is being hidden
+          loadAd();
         },
         onConsentChanged: () => {
-          console.log('onConsentChanged');
+          // The consent of the user changed
+          // Do something
         },
-        onGoogleConsentModeUpdate: (consents) => {
-          console.log('onGoogleConsentModeUpdate', consents);
+        onGoogleConsentModeUpdate: (_consents) => {
+          // The Google Consent V2 status
+          // Do something
         },
       };
       AxeptioSDK.addListener(listener);
 
+      // Manage ATT
       let trackingStatus = await getTrackingStatus();
 
       if (trackingStatus === 'not-determined') {
@@ -47,8 +90,9 @@ export default function App() {
         await AxeptioSDK.setupUI();
       }
     }
-    init();
-  }, []);
+
+    init().then(loadAd);
+  }, [loadAd]);
 
   return (
     <View style={styles.container}>
@@ -59,8 +103,17 @@ export default function App() {
         <Text style={styles.label}>Consent popup</Text>
       </Pressable>
       <Pressable
+        style={[styles.button, !loaded && styles.disabledButton]}
+        onPress={() => interstitial?.show()}
+        disabled={!interstitial || !loaded}
+      >
+        <Text style={styles.label}>Google Ad</Text>
+      </Pressable>
+      <Pressable
         style={[styles.button, styles.clearButton]}
-        onPress={() => AxeptioSDK.clearConsent()}
+        onPress={() => {
+          AxeptioSDK.clearConsent().then(loadAd);
+        }}
       >
         <Text style={styles.label}>Clear consent</Text>
       </Pressable>
@@ -95,6 +148,9 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     backgroundColor: 'rgba(205, 97, 91, 1)',
+  },
+  disabledButton: {
+    backgroundColor: '#FAFAFA',
   },
   label: {
     textAlign: 'center',

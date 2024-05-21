@@ -5,6 +5,9 @@ PODS:
   - FBLazyVector (0.74.1)
   - fmt (9.1.0)
   - glog (0.3.5)
+  - Google-Mobile-Ads-SDK (11.5.0):
+    - GoogleUserMessagingPlatform (>= 1.1)
+  - GoogleUserMessagingPlatform (2.4.0)
   - hermes-engine (0.74.1):
     - hermes-engine/Pre-built (= 0.74.1)
   - hermes-engine/Pre-built (0.74.1)
@@ -1210,6 +1213,29 @@ PODS:
     - React-logger (= 0.74.1)
     - React-perflogger (= 0.74.1)
     - React-utils (= 0.74.1)
+  - RNGoogleMobileAds (13.5.0):
+    - DoubleConversion
+    - glog
+    - Google-Mobile-Ads-SDK (= 11.5.0)
+    - GoogleUserMessagingPlatform (= 2.4.0)
+    - hermes-engine
+    - RCT-Folly (= 2024.01.01.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Codegen
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - SocketRocket (0.7.0)
   - Yoga (0.0.0)
 
@@ -1272,11 +1298,14 @@ DEPENDENCIES:
   - React-runtimescheduler (from `../node_modules/react-native/ReactCommon/react/renderer/runtimescheduler`)
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
+  - RNGoogleMobileAds (from `../node_modules/react-native-google-mobile-ads`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
   trunk:
     - AxeptioTCFSDK
+    - Google-Mobile-Ads-SDK
+    - GoogleUserMessagingPlatform
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -1393,6 +1422,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/utils"
   ReactCommon:
     :path: "../node_modules/react-native/ReactCommon"
+  RNGoogleMobileAds:
+    :path: "../node_modules/react-native-google-mobile-ads"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -1403,6 +1434,8 @@ SPEC CHECKSUMS:
   FBLazyVector: 898d14d17bf19e2435cafd9ea2a1033efe445709
   fmt: 4c2741a687cc09f0634a2e2c72a838b99f1ff120
   glog: c5d68082e772fa1c511173d6b30a9de2c05a69a2
+  Google-Mobile-Ads-SDK: 7db2098033ad3bfcd72a11e7503b49700a93029e
+  GoogleUserMessagingPlatform: f131fa7978d2ba88d7426702b057c2cc318e6595
   hermes-engine: 16b8530de1b383cdada1476cf52d1b52f0692cbc
   RCT-Folly: 02617c592a293bd6d418e0a88ff4ee1f88329b47
   RCTDeprecation: efb313d8126259e9294dc4ee0002f44a6f676aba
@@ -1454,6 +1487,7 @@ SPEC CHECKSUMS:
   React-runtimescheduler: e2152ed146b6a35c07386fc2ac4827b27e6aad12
   React-utils: 3285151c9d1e3a28a9586571fc81d521678c196d
   ReactCommon: f42444e384d82ab89184aed5d6f3142748b54768
+  RNGoogleMobileAds: 8bb05bc92cb6646c3aed31b7e3bcdfe1d8eca966
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   Yoga: 348f8b538c3ed4423eb58a8e5730feec50bce372
 

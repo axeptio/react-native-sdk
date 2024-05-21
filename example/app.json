@@ -1,4 +1,8 @@
 {
   "name": "AxeptioSdkExample",
-  "displayName": "AxeptioSdkExample"
+  "displayName": "AxeptioSdkExample",
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-3940256099942544~1033173712",
+    "ios_app_id": "ca-app-pub-3940256099942544~4411468910"
+  }
 }
