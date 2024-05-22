@@ -1,5 +1,5 @@
 {
-  "name": "react-native-axeptio-sdk-example",
+  "name": "@axeptio/react-native-sdk-example",
   "version": "0.0.1",
   "private": true,
   "scripts": {

@@ -3,7 +3,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import AxeptioSDK, {
   type AxeptioEventListener,
-} from 'react-native-axeptio-sdk';
+} from '@axeptio/react-native-sdk';
 import { AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
 import {
   getTrackingStatus,

@@ -1,3 +1,4 @@
+import AxeptioSdk from '@axeptio/react-native-sdk';
 import React, { useEffect, useState } from 'react';
 import {
   Button,
@@ -9,7 +10,6 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import AxeptioSdk from 'react-native-axeptio-sdk';
 import { WebView } from 'react-native-webview';
 
 type Props = {
