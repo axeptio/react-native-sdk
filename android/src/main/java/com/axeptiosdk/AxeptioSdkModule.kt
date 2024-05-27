@@ -80,10 +80,13 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
     }
 
     currentActivity.runOnUiThread {
-      AxeptioSDK.instance().initialize(currentActivity, clientId, cookiesVersion, token)
+      if (token.isNotEmpty()) {
+        AxeptioSDK.instance().initialize(currentActivity, clientId, cookiesVersion, token)
+      } else {
+        AxeptioSDK.instance().initialize(currentActivity, clientId, cookiesVersion)
+      }
+      promise.resolve(null)
     }
-
-    promise.resolve(null)
   }
 
   @ReactMethod
@@ -109,9 +112,8 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
 
     currentActivity.runOnUiThread {
       AxeptioSDK.instance().showConsentScreen(currentActivity, true)
+      promise.resolve(null)
     }
-
-    promise.resolve(null)
   }
 
   @ReactMethod

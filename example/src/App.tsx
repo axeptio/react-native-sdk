@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 
-import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import AxeptioSDK, {
   type AxeptioEventListener,
 } from '@axeptio/react-native-sdk';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
 import {
   getTrackingStatus,
@@ -91,8 +91,9 @@ export default function App() {
       }
     }
 
-    init().then(loadAd);
-  }, [loadAd]);
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <View style={styles.container}>
