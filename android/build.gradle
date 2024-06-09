@@ -85,7 +85,7 @@ repositories {
 def kotlin_version = getExtOrDefault("kotlinVersion")
 
 dependencies {
-  implementation("io.axept.android:sdk:1.1")
+  implementation("io.axept.android:sdk:1.2-dev03")
 
   // For < 0.71, this will be from the local maven repo
   // For > 0.71, this will be replaced by `com.facebook.react:react-android:$version` by react gradle plugin

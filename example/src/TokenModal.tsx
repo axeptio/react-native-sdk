@@ -47,7 +47,7 @@ export function TokenModal({ modalVisible, setModalVisible }: Props) {
     >
       {url ? (
         <SafeAreaView style={styles.container}>
-          <Button title="Fermer" onPress={() => setModalVisible(false)} />
+          <Button title="Close" onPress={() => setModalVisible(false)} />
           <WebView source={{ uri: url }} />
         </SafeAreaView>
       ) : (
