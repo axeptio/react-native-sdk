@@ -97,6 +97,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.redCircle}></View>
       <Pressable
         style={styles.button}
         onPress={() => AxeptioSDK.showConsentScreen()}
@@ -138,6 +139,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(253, 247, 231, 1)',
+  },
+  redCircle: {
+    position: 'absolute',
+    top: 25,
+    left: 0,
+    width: 25,
+    height: 25,
+    backgroundColor: 'rgba(205, 97, 91, 1)',
+    borderRadius: 25 / 2,
   },
   button: {
     margin: 8,
