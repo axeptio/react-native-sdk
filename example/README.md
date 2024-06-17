@@ -4,7 +4,7 @@
 
 First, be sure you have React Native installed. If not follow these [instructions](https://reactnative.dev/docs/set-up-your-environment).
 
-Then, install dependencies by running :
+Then - in this `example` directory - install dependencies by running :
 ```shell
 yarn install
 npx pod-install

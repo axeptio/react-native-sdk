@@ -14,7 +14,7 @@ yarn add @axeptio/react-native-sdk
 
 ### Android setup
 - Min sdk 26
-- Add maven github repository and credentials in your app's `android/build.gradle`
+- Add maven github repository and credentials in your app's `android/build.gradle` (at the root level of the .gradle file)
 ```groovy
 repositories {
     maven {
