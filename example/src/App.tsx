@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 
 import AxeptioSDK, {
   type AxeptioEventListener,
+  AxeptioService,
 } from '@axeptio/react-native-sdk';
 import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { AdEventType, InterstitialAd } from 'react-native-google-mobile-ads';
@@ -57,6 +58,7 @@ export default function App() {
       const platform = await AxeptioSDK.getPlaformVersion();
       console.log('Platform', platform);
       await AxeptioSDK.initialize(
+        AxeptioService.brands,
         '5fbfa806a0787d3985c6ee5f',
         'google cmp partner program sandbox-en-EU'
       );
@@ -97,7 +99,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.redCircle}></View>
+      <View style={styles.redCircle} />
       <Pressable
         style={styles.button}
         onPress={() => AxeptioSDK.showConsentScreen()}
