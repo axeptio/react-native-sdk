@@ -12,6 +12,7 @@ RCT_EXTERN_METHOD(getAxeptioToken:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(initialize:(NSString)clientId
+                  withClientId:(NSString)clientId
                   withCookiesVersion:(NSString)cookiesVersion
                   withToken:(NSString)token
                   withResolver:(RCTPromiseResolveBlock)resolve

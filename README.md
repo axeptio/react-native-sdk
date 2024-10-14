@@ -2,6 +2,8 @@
 
 This repository demonstrates how to implement the Axeptio React Native SDK in your mobile applications.
 
+This example can be compiled with brands or publishers given your requirements.
+
 ## Setup
 
 ### Installation
@@ -18,7 +20,7 @@ yarn add @axeptio/react-native-sdk
 ```groovy
 repositories {
     maven {
-        url = uri("https://maven.pkg.github.com/axeptio/tcf-android-sdk")
+        url = uri("https://maven.pkg.github.com/axeptio/axeptio-android-sdk")
         credentials {
            username = "[GITHUB_USERNAME]"
            password = "[GITHUB_TOKEN]"
@@ -46,6 +48,7 @@ Read the specific [documentation](./example/README.md).
 ```typescript
 async function init() {
   await AxeptioSDK.initialize(
+    AxeptioService.brands, // or AxeptioService.tcfPublishers
     [your_client_id],
     [your_cookies_version],
     [optional_consent_token]
@@ -96,6 +99,8 @@ AxeptioSdk.showConsentScreen();
 ```
 
 ### Sharing consents with other web views
+>*This feature is only available for **publishers** service.*
+
 The SDK provides a helper function to append the `axeptio_token` query param to any URL.
 You can precise a custom user token or use the one currently stored in the SDK.
 
