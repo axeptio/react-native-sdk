@@ -39,11 +39,17 @@ class AxeptioSdk {
   }
 
   initialize(
+    targetService: AxeptioService,
     clientId: string,
     cookiesVersion: string,
     token?: string
   ): Promise<void> {
-    return AxeptioSdkNative.initialize(clientId, cookiesVersion, token ?? '');
+    return AxeptioSdkNative.initialize(
+      targetService,
+      clientId,
+      cookiesVersion,
+      token ?? ''
+    );
   }
 
   setupUI(): Promise<void> {
@@ -85,6 +91,11 @@ enum AxeptioEvent {
   onPopupClosedEvent = 'onPopupClosedEvent',
   onConsentChanged = 'onConsentChanged',
   onGoogleConsentModeUpdate = 'onGoogleConsentModeUpdate',
+}
+
+export enum AxeptioService {
+  brands = 'brands',
+  tcfPublishers = 'publishers',
 }
 
 export type AxeptioEventListener = {

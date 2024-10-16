@@ -54,18 +54,21 @@ class AxeptioSdk: RCTEventEmitter {
         resolve(Axeptio.shared.axeptioToken)
     }
 
-    @objc(initialize:withCookiesVersion:withToken:withResolver:withRejecter:)
+    
+    @objc(initialize:withClientId:withCookiesVersion:withToken:withResolver:withRejecter:)
     func initialize(
+        targetService: String,
         clientId: String,
         cookiesVersion: String,
         token: String,
         resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
+        let targetService = AxeptioServiceHelper.fromString(targetService)
         if token.isEmpty {
-            Axeptio.shared.initialize(clientId: clientId, cookiesVersion: cookiesVersion)
+            Axeptio.shared.initialize(targetService: targetService,clientId: clientId, cookiesVersion: cookiesVersion)
         } else {
-            Axeptio.shared.initialize(clientId: clientId, cookiesVersion: cookiesVersion, token: token)
+            Axeptio.shared.initialize(targetService: targetService,clientId: clientId, cookiesVersion: cookiesVersion, token: token)
         }
         resolve(nil)
     }

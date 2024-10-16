@@ -14,6 +14,7 @@ import io.axept.android.googleconsent.GoogleConsentStatus
 import io.axept.android.googleconsent.GoogleConsentType
 import io.axept.android.library.AxeptioEventListener
 import io.axept.android.library.AxeptioSDK
+import io.axept.android.library.AxeptioService
 
 class AxeptioSdkModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -71,19 +72,23 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun initialize(clientId: String, cookiesVersion: String, token: String, promise: Promise) {
+  fun initialize(targetService: String, clientId: String, cookiesVersion: String, token: String, promise: Promise) {
     val currentActivity = super.getCurrentActivity();
 
     if (currentActivity == null) {
       promise.resolve(null)
       return
     }
-
+    val axeptioService = when (targetService) {
+      "brands" -> AxeptioService.BRANDS
+      "publishers" -> AxeptioService.PUBLISHERS_TCF
+      else -> AxeptioService.PUBLISHERS_TCF
+    }
     currentActivity.runOnUiThread {
       if (token.isNotEmpty()) {
-        AxeptioSDK.instance().initialize(currentActivity, clientId, cookiesVersion, token)
+        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, token)
       } else {
-        AxeptioSDK.instance().initialize(currentActivity, clientId, cookiesVersion)
+        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion)
       }
       promise.resolve(null)
     }
