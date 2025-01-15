@@ -45,6 +45,9 @@ Read the specific [documentation](./example/README.md).
 
 ## Usage
 ### Initialize the SDK on app start up:
+
+The SDK can be configured for either brands or publishers via the AxeptioService enum during initialization.
+
 ```typescript
 async function init() {
   await AxeptioSDK.initialize(
@@ -58,6 +61,10 @@ async function init() {
 ```
 
 ### App Tracking Transparency (ATT)
+
+The Axeptio SDK does not ask for the user permission for tracking in the ATT framework and it is the responsibility of the app to do so and to decide how the Axeptio CMP and the ATT permission should coexist.
+
+Your app must follow [Apple's guidelines](https://developer.apple.com/app-store/user-privacy-and-data-use/) for disclosing the data collected by your app and asking for the user's permission for tracking.
 
 To manage App Tracking Transparency, you can use the [react-native-tracking-transparency](https://www.npmjs.com/package/react-native-tracking-transparency) widget.
 
@@ -90,6 +97,27 @@ if (trackingStatus === 'denied') {
   await AxeptioSDK.setupUI();
 }
 ```
+
+### Responsibilities: Mobile App vs SDK
+
+The Axeptio SDK and your mobile application have distinct responsibilities in managing user consent and tracking:
+
+#### Mobile Application Responsibilities:
+- Implementing and managing the App Tracking Transparency (ATT) permission flow
+- Deciding when to show the ATT prompt relative to the Axeptio CMP
+- Properly declaring data collection practices in App Store privacy labels
+- Handling SDK events and updating app behavior based on user consent
+
+#### Axeptio SDK Responsibilities:
+- Displaying the consent management platform (CMP) interface
+- Managing and storing user consent choices
+- Sending consent status through APIs
+
+The SDK does not automatically handle ATT permissions - this must be explicitly managed by the host application as shown in the implementation examples above.
+
+### Get stored consents
+
+You can retrieve the consents that are stored by the SDK in UserDefaults/SharedPreferences.
 
 ### Show consent popup on demand
 
