@@ -1,5 +1,5 @@
 PODS:
-  - AxeptioIOSSDK (2.0.1)
+  - AxeptioIOSSDK (2.0.2)
   - boost (1.83.0)
   - DoubleConversion (1.1.6)
   - FBLazyVector (0.74.1)
@@ -939,8 +939,8 @@ PODS:
   - React-Mapbuffer (0.74.1):
     - glog
     - React-debug
-  - react-native-axeptio-sdk (2.0.1):
-    - AxeptioIOSSDK (= 2.0.1)
+  - react-native-axeptio-sdk (2.0.2):
+    - AxeptioIOSSDK (= 2.0.2)
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1428,7 +1428,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  AxeptioIOSSDK: 2e4140295c5953f6069704c75c02ed1dc25c98d0
+  AxeptioIOSSDK: 2dffc02ee21cd436a2991a6fda9cd260ec761a14
   boost: d3f49c53809116a5d38da093a8aa78bf551aed09
   DoubleConversion: 76ab83afb40bddeeee456813d9c04f67f78771b5
   FBLazyVector: 898d14d17bf19e2435cafd9ea2a1033efe445709
@@ -1461,7 +1461,7 @@ SPEC CHECKSUMS:
   React-jsitracing: 233d1a798fe0ff33b8e630b8f00f62c4a8115fbc
   React-logger: 7e7403a2b14c97f847d90763af76b84b152b6fce
   React-Mapbuffer: 11029dcd47c5c9e057a4092ab9c2a8d10a496a33
-  react-native-axeptio-sdk: 7efbd499c9bedf0cf65df17b8b05ccb684b038f2
+  react-native-axeptio-sdk: c29511f3fd6def5f5377748272213951f74f2e2b
   react-native-tracking-transparency: 25ff1ff866e338c137c818bdec20526bb05ffcc1
   react-native-webview: 2905d1455be11bcbd909ef33472d8fcdf7abcc41
   React-nativeconfig: b0073a590774e8b35192fead188a36d1dca23dec
@@ -1493,4 +1493,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: b79020d30a4a2bf09998ac4b177804cd852ec3c9
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
