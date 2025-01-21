@@ -161,14 +161,11 @@ We provide an `AxeptioEventListener` class that can be use to catch events. Don'
 ```typescript
 const listener: AxeptioEventListener = {
   onPopupClosedEvent: () => {
-    // The CMP notice is being hidden
-    // Do something
-  },
-  onConsentChanged: () => {
-    // Retrieve consents from UserDefaults
+    // Retrieve consents from UserDefaults/SharedPreferences
     // Check user preferences
     // Run external process/services according user consents
   },
+
   onGoogleConsentModeUpdate: (_consents) => {
     // The Google Consent V2 status
     // Do something
