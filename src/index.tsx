@@ -95,7 +95,7 @@ enum AxeptioEvent {
 
 export enum AxeptioService {
   brands = 'brands',
-  tcfPublishers = 'publishers',
+  tcfPublishers = 'publisher',
 }
 
 export type AxeptioEventListener = {
