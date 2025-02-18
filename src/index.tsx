@@ -89,7 +89,7 @@ class AxeptioSdk {
 
 enum AxeptioEvent {
   onPopupClosedEvent = 'onPopupClosedEvent',
-  onConsentChanged = 'onConsentChanged',
+  onConsentCleared = 'onConsentCleared',
   onGoogleConsentModeUpdate = 'onGoogleConsentModeUpdate',
 }
 
@@ -100,7 +100,7 @@ export enum AxeptioService {
 
 export type AxeptioEventListener = {
   [AxeptioEvent.onPopupClosedEvent]?: () => void;
-  [AxeptioEvent.onConsentChanged]?: () => void;
+  [AxeptioEvent.onConsentCleared]?: () => void;
   [AxeptioEvent.onGoogleConsentModeUpdate]?: (consent: GoogleConsentV2) => void;
 };
 

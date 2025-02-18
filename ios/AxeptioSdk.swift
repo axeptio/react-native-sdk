@@ -13,9 +13,9 @@ class AxeptioSdk: RCTEventEmitter {
             self.sendEvent(withName: "onPopupClosedEvent", body: nil)
         }
 
-        axeptioEventListener.onConsentChanged = { [weak self] in
+        axeptioEventListener.onConsentCleared = { [weak self] in
             guard let self else { return }
-            self.sendEvent(withName: "onConsentChanged", body: nil)
+            self.sendEvent(withName: "onConsentCleared", body: nil)
         }
 
         axeptioEventListener.onGoogleConsentModeUpdate = { [weak self] consents in
@@ -33,7 +33,7 @@ class AxeptioSdk: RCTEventEmitter {
     @objc open override func supportedEvents() -> [String] {
         return [
             "onPopupClosedEvent",
-            "onConsentChanged",
+            "onConsentCleared",
             "onGoogleConsentModeUpdate",
         ]
     }
