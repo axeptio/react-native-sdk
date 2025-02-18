@@ -40,6 +40,12 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
           .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
           .emit("onGoogleConsentModeUpdate", map)
       }
+
+      override fun onConsentCleared() {
+        reactContext
+          .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+          .emit("onConsentCleared", null)
+      }
     }
 
     axeptioEventListener?.let { AxeptioSDK.instance().setEventListener(it) }

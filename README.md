@@ -170,6 +170,9 @@ const listener: AxeptioEventListener = {
     // The Google Consent V2 status
     // Do something
   },
+  onConsentCleared: () => {
+    // The user has cleared their consent
+  }
 };
 AxeptioSDK.addListener(listener);
 ```

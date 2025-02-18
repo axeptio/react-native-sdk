@@ -68,9 +68,10 @@ export default function App() {
           // The CMP notice is being hidden
           loadAd();
         },
-        onConsentChanged: () => {
-          // The consent of the user changed
+        onConsentCleared: () => {
+          // The consent are cleared
           // Do something
+          console.log('Consent cleared');
         },
         onGoogleConsentModeUpdate: (_consents) => {
           // The Google Consent V2 status
@@ -81,15 +82,12 @@ export default function App() {
 
       // Manage ATT
       let trackingStatus = await getTrackingStatus();
-
       if (trackingStatus === 'not-determined') {
         trackingStatus = await requestTrackingPermission();
       }
 
       if (trackingStatus === 'denied') {
         await AxeptioSDK.setUserDeniedTracking();
-      } else {
-        await AxeptioSDK.setupUI();
       }
     }
 
