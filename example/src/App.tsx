@@ -88,6 +88,8 @@ export default function App() {
 
       if (trackingStatus === 'denied') {
         await AxeptioSDK.setUserDeniedTracking();
+      } else {
+        await AxeptioSDK.setupUI();
       }
     }
 
