@@ -1,7 +1,7 @@
-<h1>
-<img src="https://axeptio.imgix.net/2024/07/e444a7b2-ea3d-4471-a91c-6be23e0c3cbb.png" alt="Descrizione immagine" width="80" style="vertical-align: middle; margin-right: 10px;" />
-  Axeptio React Native SDK Integration
-</h1>
+<img src="https://github.com/user-attachments/assets/09c669ea-3187-4fc2-8763-c209d8f4cde4" width="600" height="300"/>
+
+# Axeptio React Native SDK Integration
+
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![React Native Compatibility](https://img.shields.io/badge/React%20Native-%3E%3D%20065-blue) ![Android SDK](https://img.shields.io/badge/Android%20SDK-%3E%3D%2026-blue) ![iOS Version](https://img.shields.io/badge/iOS%20Versions-%3E%3D%2015-blue)
 
