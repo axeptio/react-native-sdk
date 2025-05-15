@@ -3,7 +3,7 @@ name: Validate Package
 on:
   pull_request:
     branches:
-	- '*'
+      - '*'
 
 jobs:
   validate:
@@ -22,6 +22,22 @@ jobs:
 
       - name: Validate package.json syntax
         run: jsonlint package.json
+
+      - name: Check if version is already published on npm
+        id: version_check
+        run: |
+          PKG_NAME=$(jq -r .name package.json)
+          PKG_VERSION=$(jq -r .version package.json)
+          echo "Checking published versions of $PKG_NAME..."
+          PUBLISHED=$(npm view "$PKG_NAME" versions --json | jq -r '.[]' | grep -F "$PKG_VERSION" || true)
+          if [ -z "$PUBLISHED" ]; then
+            echo "❌ Version $PKG_VERSION of $PKG_NAME is NOT yet published on npm."
+            echo "Published versions:"
+            npm view "$PKG_NAME" versions
+            exit 1
+          else
+            echo "✅ Version $PKG_VERSION is already published on npm."
+          fi
 
       - name: Install dependencies
         run: npm install
