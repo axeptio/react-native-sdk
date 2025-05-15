@@ -1,10 +1,6 @@
 name: Preflight Release Check
 
 on:
-  pull_request:
-    branches:
-      - '*'
-
   workflow_dispatch:
 
 permissions:
@@ -25,7 +21,14 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm install
+
+      - name: Configure npm for authentication
+        run: echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Run release-it in dry-run mode
         run: npx release-it --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
