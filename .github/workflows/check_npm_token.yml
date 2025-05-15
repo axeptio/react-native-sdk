@@ -1,6 +1,8 @@
 name: Check NPM Token Access
 
-# To run locally on OS X with (brew install act): act workflow_dispatch --secret-file .secrets --container-architecture linux/amd64
+# To run locally on OS X with (brew install act):
+# add your secret to a .secrets file (NPM_TOKEN=<...>)
+# then: act -j check-npm-token --secret-file .secrets --container-architecture linux/amd64
 on:
   workflow_dispatch:
 
@@ -28,6 +30,15 @@ jobs:
         run: npm whoami
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # This step is needed when running with act to ensure yarn is available
+      - name: Install Yarn
+        run: corepack enable && corepack prepare yarn@stable --activate
+        shell: bash
+
+      # Setup required before running dry-run, requires yarn
+      - name: Setup
+        uses: ./.github/actions/setup
 
       - name: Check if token has publish access
         run: |
