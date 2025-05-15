@@ -1,9 +1,8 @@
 name: Validate Package
 
 on:
-  pull_request:
-    branches:
-      - '*'
+  workflow_dispatch:
+
 
 permissions:
   contents: read
