@@ -1,0 +1,37 @@
+name: Check NPM Token Access
+
+# To run locally on OS X with (brew install act): act workflow_dispatch --secret-file .secrets --container-architecture linux/amd64
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-npm-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Configure npm authentication
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Run npm whoami
+        run: npm whoami
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Check if token has publish access
+        run: |
+          echo "🔍 Simulating publish to check access..."
+          npm publish --dry-run --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
