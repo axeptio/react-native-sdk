@@ -1,5 +1,6 @@
 name: Publish to npm
 
+# If this fails, please ensure that the NPM TOKEN is still valid
 on:
   release:
     types: [published]
