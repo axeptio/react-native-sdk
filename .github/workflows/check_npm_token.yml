@@ -4,6 +4,9 @@ name: Check NPM Token Access
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   check-npm-token:
     runs-on: ubuntu-latest
