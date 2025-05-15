@@ -1,0 +1,31 @@
+name: Preflight Release Check
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-dry-run:
+    name: Dry-Run Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Run release-it in dry-run mode
+        run: npx release-it --dry-run
