@@ -2,8 +2,10 @@
 
 set -euo pipefail
 
-EXAMPLE_DIR="example"
-ENV_FLAG_FILE=".env.setup"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+EXAMPLE_DIR="$ROOT_DIR/example"
+ENV_FLAG_FILE="$EXAMPLE_DIR/.env.setup"
+XCODE_ENV_FILE="$EXAMPLE_DIR/ios/.xcode.env"
 
 # Ensure the example directory exists
 if [[ ! -d "$EXAMPLE_DIR" ]]; then
@@ -42,6 +44,15 @@ fi
 if [[ "$(uname)" == "Darwin" && -f ios/Podfile ]]; then
   echo "📱 Running pod install with npx..."
   npx pod-install
+fi
+
+# Configure .xcode.env with node path
+if [[ ! -f "$XCODE_ENV_FILE" ]]; then
+  echo "🛠️ Setting up .xcode.env with node path..."
+  echo "export NODE_BINARY=$(command -v node)" > "$XCODE_ENV_FILE"
+  echo "✅ .xcode.env created at $XCODE_ENV_FILE"
+else
+  echo "✅ .xcode.env already exists."
 fi
 
 # Ensure env setup marker is written
