@@ -82,12 +82,13 @@ class AxeptioSdk: RCTEventEmitter {
         resolve(nil)
     }
 
-    @objc(setUserDeniedTracking:withRejecter:)
+    @objc(setUserDeniedTracking:withResolver:withRejecter:)
     func setUserDeniedTracking(
+        denied: Bool,
         resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
-        Axeptio.shared.setUserDeniedTracking()
+        Axeptio.shared.setUserDeniedTracking(denied: denied)
         resolve(nil)
     }
 
