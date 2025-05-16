@@ -77,7 +77,15 @@
   },
   "resolutions": {
     "@types/react": "18.2.44",
-    "@types/react-native": "0.76.2"
+    "@types/react-native": "0.76.2",
+    "connect": "3.7.0",
+    "metro": "0.81.5",
+    "metro-config": "0.81.5",
+    "metro-core": "0.81.5",
+    "metro-resolver": "0.81.5",
+    "metro-source-map": "0.81.5",
+    "metro-symbolicate": "0.81.5",
+    "@react-native/metro-config": "0.76.5"
   },
   "peerDependencies": {
     "react": "*",

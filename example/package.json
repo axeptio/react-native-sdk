@@ -20,6 +20,7 @@
     "@babel/core": "^7.26.9",
     "@babel/runtime": "^7.26.9",
     "@react-native-community/cli": "^18.0.0",
+    "@react-native-community/cli-platform-android": "^18.0.0",
     "@react-native/babel-preset": "0.76.5",
     "@react-native/metro-config": "0.76.5",
     "@react-native/typescript-config": "0.76.5",
@@ -27,5 +28,10 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "scripts": {
+    "start": "node start.js",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios"
   }
 }

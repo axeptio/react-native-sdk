@@ -1,4 +1,14 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = 'AxeptioSdkExample'
-apply from: file("../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesSettingsGradle(settings)
-include ':app'
+
+include(':app')
+
+// Load React Native Gradle plugin from node_modules
 includeBuild('../node_modules/@react-native/gradle-plugin')
