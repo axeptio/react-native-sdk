@@ -75,7 +75,7 @@ repositories {
 ```
 
 #### iOS Setup
-- We support **iOS versions >= 15**.
+- We support **iOS versions >= 16.4**.
 - Run the following command to install the dependencies:
 ```bash
 npx pod-install
@@ -98,7 +98,7 @@ async function init() {
       [your_cookies_version], // Replace with your current cookies version (as defined by your platform)
       [optional_consent_token] // Optional: If available, provide an existing consent token to restore previous consent choices
     );
-  
+
     // Setup the user interface for consent management
     await AxeptioSDK.setupUI();
 
