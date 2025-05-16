@@ -939,7 +939,7 @@ PODS:
   - React-Mapbuffer (0.74.7):
     - glog
     - React-debug
-  - react-native-axeptio-sdk (2.0.6):
+  - react-native-axeptio-sdk (2.0.7):
     - AxeptioIOSSDK (= 2.0.10)
     - DoubleConversion
     - glog
@@ -1461,7 +1461,7 @@ SPEC CHECKSUMS:
   React-jsitracing: a884f4eb46ba8c373d909f9a712824af65ff41b8
   React-logger: 58cd5ca2c3ab03a06b33e6d46a210d2b17ca116d
   React-Mapbuffer: f245095650540b8ddd09ac907a79605f68b1f4d4
-  react-native-axeptio-sdk: e30eaedd3b7a68e1e73f1fbfeea4754857f9f801
+  react-native-axeptio-sdk: ddfe1cb16f49e4d20ae03674709b76d9e048e116
   react-native-tracking-transparency: 15eb319f2b982070eb9831582af27d87badfa624
   react-native-webview: 311760d736aea5712c17f8de313f00b11e33375e
   React-nativeconfig: 3b359be06d9ee8d64c1eacbca4f1040f331573fd
