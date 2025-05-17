@@ -1,10 +1,14 @@
 const path = require('path');
-const pak = require('../package.json');
 
 module.exports = {
+  project: {
+    android: {
+      packageName: 'com.axeptiosdkexample',
+    },
+  },
   dependencies: {
-    [pak.name]: {
-      root: path.join(__dirname, '..'),
+    '@axeptio/react-native-sdk': {
+      root: path.resolve(__dirname, '..'),
     },
   },
 };
