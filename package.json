@@ -73,7 +73,7 @@
     "react-native-builder-bob": "^0.37.0",
     "release-it": "^15.11.0",
     "turbo": "^1.13.4",
-    "typescript": "^5.8.2"
+    "typescript": "5.1"
   },
   "resolutions": {
     "@types/react": "18.2.44",
@@ -167,5 +167,8 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "react-native-tracking-transparency": "^0.1.2"
   }
 }
