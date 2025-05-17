@@ -21,11 +21,11 @@ Make sure you have the following installed:
 
 - To locally run GitHub actions: **act** ```brew install act```
 
-## Install Dependencies
+### Install Dependencies
 
 - Prepare the example directory: ```./setup-example.ch```
 
-## iOS setup
+### iOS setup
 
 - Open the Xcode workspace
  ```
@@ -44,9 +44,54 @@ open AxeptioSdkExample.xcworkspace
 
  ```echo "export NODE_BINARY=$(command -v node)" > .xcode.env ```
 
-## Run
+### Run
 
 Finally, run the projet by running :
 ```shell
 yarn start
 ```
+
+## Android
+
+### Android Studio
+
+- SDK 31, 34, and 35
+- Command line tools
+
+### Mac OS Env setup
+
+- Node 20 & Maven (with brew)
+- JDK 17 (Brew openJDK@17)
+- get your env right (Mac OS)
+
+```
+# NODE
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"  # This loads nvm bash_completion
+
+# ANDROID
+export ANDROID_HOME="/Users/me/Library/Android/sdk"
+export PATH="$ANDROID_HOME/emulator:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
+
+# GITHUB
+export GITHUB_USERNAME=me
+export GITHUB_TOKEN=mytoken
+export GITHUB_ACTOR=me
+git config --global commit.gpgsign true
+git config --global user.signingkey mykey
+
+# JAVA
+export PATH="/opt/homebrew/opt/openjdk@17/bin:$PATH"
+export CPPFLAGS="-I/opt/homebrew/opt/openjdk@17/include"
+export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
+```
+
+### Build
+
+- clean ```./clean.sh```
+- dependencies ```./install-all.sh```
+- fix autolink ```cd example ./fix-autolink.sh```
+- get an emulator running  ```./start-emulator.sh ```
+- In one terminal window ```yarn start```
+- In another window ```yarn android```
