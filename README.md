@@ -67,8 +67,8 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/axeptio/axeptio-android-sdk")
         credentials {
-            username = "[GITHUB_USERNAME]"
-            password = "[GITHUB_TOKEN]"
+            username = System.getenv("GITHUB_USERNAME") ?: ""
+            password = System.getenv("GITHUB_TOKEN") ?: ""
         }
     }
 }
