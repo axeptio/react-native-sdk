@@ -61,6 +61,7 @@ yarn start
 ### Mac OS Env setup
 
 - Node 20 & Maven (with brew)
+- JDK 17 (Brew openJDK@17)
 - get your env right (Mac OS)
 
 ```
@@ -90,9 +91,7 @@ export JAVA_HOME="/opt/homebrew/opt/openjdk@17"
 
 - clean ```./clean.sh```
 - dependencies ```./install-all.sh```
-- fix autolink
-  ```cd example
-     ./fix-autolink.sh```
+- fix autolink ```cd example ./fix-autolink.sh```
 - get an emulator running  ```./start-emulator.sh ```
 - In one terminal window ```yarn start```
 - In another window ```yarn android```
