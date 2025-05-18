@@ -24,6 +24,7 @@ if [ -d "android" ] && [ -f "android/gradlew" ]; then
   echo "🧽 Cleaning Android build..."
   cd android
   ./gradlew clean
+  rm -rf .gradle build
   cd ..
 fi
 
@@ -32,10 +33,23 @@ if [ -d "example/android" ] && [ -f "example/android/gradlew" ]; then
     echo "🧽 Cleaning Android build (example)..."
     cd example/android
     ./gradlew clean
+    rm -rf .gradle build
+    # Remove AARs and APKs/libs
+    rm -rf app/libs/*
+    rm -rf app/build/outputs
     cd ../..
   else
     echo "⚠️ Skipping Gradle clean in example/android: plugins missing (expected after deleting node_modules)"
   fi
+fi
+
+# 4b. Uninstall app from all connected Android devices
+APP_PACKAGE="com.axeptiosdkexample"
+if command -v adb >/dev/null 2>&1; then
+  echo "📱 Uninstalling $APP_PACKAGE from all Android devices/emulators..."
+  adb devices | awk 'NR>1 && $1 {print $1}' | xargs -I{} adb -s {} uninstall $APP_PACKAGE || true
+else
+  echo "⚠️ adb not found, skipping Android uninstall."
 fi
 
 # 5. iOS clean (only if Xcode project exists)
