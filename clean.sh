@@ -8,16 +8,18 @@ pkill -f "react-native/cli.js" 2>/dev/null
 pkill -f "node.*metro" 2>/dev/null
 
 # 2. Remove node_modules, lock files, caches
-echo "🗑 Removing node_modules, lock files, and yarn cache..."
+echo "🗑 Removing node_modules, lock files, and yarn/npm cache..."
 rm -rf node_modules example/node_modules ios/Pods .expo .expo-shared .turbo
 rm -f yarn.lock package-lock.json example/yarn.lock example/package-lock.json
 yarn cache clean --all
 npm cache clean --force
 
-# 3. Watchman and Metro cache clear
-echo "🧼 Clearing Metro & Watchman caches..."
+# 3. Watchman, Metro, and Babel cache clear
+echo "🧼 Clearing Metro, Babel, & Watchman caches..."
 watchman watch-del-all 2>/dev/null
-rm -rf /tmp/metro-* /tmp/haste-map-* example/tmp/metro-* example/tmp/haste-map-*
+rm -rf $TMPDIR/metro-* $TMPDIR/haste-map-* /tmp/metro-* /tmp/haste-map-* example/tmp/metro-* example/tmp/haste-map-*
+rm -rf .babel.* example/.babel.*
+rm -rf .expo example/.expo
 
 # 4. Android clean (only if gradlew exists)
 if [ -d "android" ] && [ -f "android/gradlew" ]; then
@@ -52,24 +54,38 @@ else
   echo "⚠️ adb not found, skipping Android uninstall."
 fi
 
-# 5. iOS clean (only if Xcode project exists)
-if [ -d "ios" ] && (ls ios/*.xcodeproj 1> /dev/null 2>&1 || ls ios/*.xcworkspace 1> /dev/null 2>&1); then
-  echo "🧽 Cleaning iOS build..."
-  cd ios
-  xcodebuild clean
-  rm -rf ~/Library/Developer/Xcode/DerivedData/*
-  cd ..
-fi
+# 5. iOS clean
+function ios_clean() {
+  local dir="$1"
+  if [ -d "$dir" ]; then
+    echo "🧽 Cleaning iOS build in $dir..."
+    cd "$dir"
+    # Clean Pods, build, and cache
+    rm -rf Pods Podfile.lock build
+    pod cache clean --all 2>/dev/null
+    xcodebuild clean 2>/dev/null
+    cd - >/dev/null
+  fi
+}
 
-if [ -d "example/ios" ] && (ls example/ios/*.xcodeproj 1> /dev/null 2>&1 || ls example/ios/*.xcworkspace 1> /dev/null 2>&1); then
-  echo "🧽 Cleaning iOS build (example)..."
-  cd example/ios
-  xcodebuild clean
-  rm -rf ~/Library/Developer/Xcode/DerivedData/*
-  rm -rf build
-  cd ../..
-fi
+# Clean main ios directory
+ios_clean "ios"
+# Clean example ios directory
+ios_clean "example/ios"
+
+# Remove Xcode derived data and other cache
+echo "🧼 Removing Xcode DerivedData, xcuserdata, and other iOS caches..."
+rm -rf ~/Library/Developer/Xcode/DerivedData/*
+rm -rf ~/Library/Caches/CocoaPods/*
+rm -rf ~/Library/Developer/Xcode/Archives/*
+rm -rf ~/Library/Developer/Xcode/iOS\ DeviceSupport/*
+rm -rf ~/Library/Developer/XCPGDevices/*
+find . -name 'xcuserdata' -type d -prune -exec rm -rf {} +
+
+# Optionally clean Swift Package caches (uncomment if needed)
+# rm -rf ~/Library/Caches/org.swift.swiftpm
+# rm -rf ~/Library/Developer/Xcode/DerivedData/SourcePackages
 
 echo "✅ Done! Now run:"
 echo "   yarn install && cd example && yarn install"
-echo "Then: npx react-native start"
+echo "Then: npx react-native start --reset-cache"
