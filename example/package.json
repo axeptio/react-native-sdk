@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "start": "react-native start",
-    "startjs": "node start.js",
-    "android": "react-native run-android --no-packager",
-    "ios": "react-native run-ios"
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "build:android": "cd android && ./gradlew assembleDebug --no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a",
+    "build:ios": "cd ios && xcodebuild -workspace AxeptioSdkExample.xcworkspace -scheme AxeptioSdkExample -configuration Debug -sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO"
   },
   "dependencies": {
-    "react": "18.2.0",
+    "react": "18.3.1",
     "react-native": "0.76.9",
-    "react-native-google-mobile-ads": "^13.6.1",
+    "react-native-google-mobile-ads": "^14.7.2",
     "react-native-tracking-transparency": "^0.1.2",
     "react-native-webview": "^13.13.2"
   },
@@ -23,7 +24,8 @@
     "@react-native/babel-preset": "0.76.5",
     "@react-native/metro-config": "0.76.5",
     "@react-native/typescript-config": "0.76.5",
-    "babel-plugin-module-resolver": "^5.0.2"
+    "babel-plugin-module-resolver": "^5.0.2",
+    "metro-react-native-babel-preset": "^0.77.0"
   },
   "engines": {
     "node": ">=18"

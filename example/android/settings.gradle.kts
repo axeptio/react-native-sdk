@@ -10,7 +10,6 @@ pluginManagement {
 dependencyResolutionManagement {
         repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
-        maven { url = uri("https://example.com/this-should-break") }
         google()
         mavenCentral()
         maven {
@@ -28,3 +27,5 @@ rootProject.name = "AxeptioSdkExample"
 include(":app")
 include(":axeptio_react-native-sdk")
 project(":axeptio_react-native-sdk").projectDir = File(rootDir, "../../android")
+include(":react-native-google-mobile-ads")
+project(":react-native-google-mobile-ads").projectDir = File(rootDir, "../node_modules/react-native-google-mobile-ads/android")

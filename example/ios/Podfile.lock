@@ -6,9 +6,9 @@ PODS:
   - FBLazyVector (0.76.9)
   - fmt (11.0.2)
   - glog (0.3.5)
-  - Google-Mobile-Ads-SDK (11.5.0):
+  - Google-Mobile-Ads-SDK (12.2.0):
     - GoogleUserMessagingPlatform (>= 1.1)
-  - GoogleUserMessagingPlatform (2.4.0)
+  - GoogleUserMessagingPlatform (2.7.0)
   - hermes-engine (0.76.9):
     - hermes-engine/Pre-built (= 0.76.9)
   - hermes-engine/Pre-built (0.76.9)
@@ -1314,7 +1314,7 @@ PODS:
     - Yoga
   - react-native-tracking-transparency (0.1.2):
     - React
-  - react-native-webview (13.13.2):
+  - react-native-webview (13.13.5):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1607,11 +1607,11 @@ PODS:
     - React-logger
     - React-perflogger
     - React-utils (= 0.76.9)
-  - RNGoogleMobileAds (13.6.1):
+  - RNGoogleMobileAds (14.11.0):
     - DoubleConversion
     - glog
-    - Google-Mobile-Ads-SDK (= 11.5.0)
-    - GoogleUserMessagingPlatform (= 2.4.0)
+    - Google-Mobile-Ads-SDK (= 12.2.0)
+    - GoogleUserMessagingPlatform (= 2.7.0)
     - hermes-engine
     - RCT-Folly (= 2024.10.14.00)
     - RCTRequired
@@ -1859,8 +1859,8 @@ SPEC CHECKSUMS:
   FBLazyVector: 7605ea4810e0e10ae4815292433c09bf4324ba45
   fmt: 01b82d4ca6470831d1cc0852a1af644be019e8f6
   glog: 08b301085f15bcbb6ff8632a8ebaf239aae04e6a
-  Google-Mobile-Ads-SDK: 7db2098033ad3bfcd72a11e7503b49700a93029e
-  GoogleUserMessagingPlatform: f131fa7978d2ba88d7426702b057c2cc318e6595
+  Google-Mobile-Ads-SDK: 1dfb0c3cb46c7e2b00b0f4de74a1e06d9ea25d67
+  GoogleUserMessagingPlatform: a8b56893477f67212fbc8411c139e61d463349f5
   hermes-engine: 9e868dc7be781364296d6ee2f56d0c1a9ef0bb11
   RCT-Folly: ea9d9256ba7f9322ef911169a9f696e5857b9e17
   RCTDeprecation: ebe712bb05077934b16c6bf25228bdec34b64f83
@@ -1893,7 +1893,7 @@ SPEC CHECKSUMS:
   React-microtasksnativemodule: d80ff86c8902872d397d9622f1a97aadcc12cead
   react-native-axeptio-sdk: ae6fd19c94cbba693773ada28f5517a4851de696
   react-native-tracking-transparency: 15eb319f2b982070eb9831582af27d87badfa624
-  react-native-webview: bdc74445f47a6d6d5e174c49c23ca90adb64988f
+  react-native-webview: bd489cf45e34be236df3394d3fe33a94319820d6
   React-nativeconfig: 8efdb1ef1e9158c77098a93085438f7e7b463678
   React-NativeModulesApple: cebca2e5320a3d66e123cade23bd90a167ffce5e
   React-perflogger: 72e653eb3aba9122f9e57cf012d22d2486f33358
@@ -1921,7 +1921,7 @@ SPEC CHECKSUMS:
   React-utils: ed818f19ab445000d6b5c4efa9d462449326cc9f
   ReactCodegen: f853a20cc9125c5521c8766b4b49375fec20648b
   ReactCommon: 300d8d9c5cb1a6cd79a67cf5d8f91e4d477195f9
-  RNGoogleMobileAds: 2424bcd214b109a193afd7b2a300189d64cd9c43
+  RNGoogleMobileAds: 77f6a4af524e3b941b399139d5325d800372c57f
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: feb4910aba9742cfedc059e2b2902e22ffe9954a
 
