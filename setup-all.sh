@@ -27,6 +27,21 @@ cd "$EXAMPLE_DIR"
 yarn install || { echo "❌ yarn install failed in example/"; exit 1; }
 cd "$ROOT_DIR"
 
+# --- Force assembleRelease for react-native-google-mobile-ads ---
+EXAMPLE_ANDROID_DIR="$EXAMPLE_DIR/android"
+if [ -f "$EXAMPLE_ANDROID_DIR/gradlew" ]; then
+  echo "🛠️  Building :react-native-google-mobile-ads:assembleRelease..."
+  cd "$EXAMPLE_ANDROID_DIR"
+  ./gradlew :react-native-google-mobile-ads:assembleRelease || {
+    echo "❌ Gradle build failed for :react-native-google-mobile-ads:assembleRelease"
+    exit 1
+  }
+  cd "$ROOT_DIR"
+else
+  echo "❌ gradlew not found in $EXAMPLE_ANDROID_DIR"
+  exit 1
+fi
+
 # --- Install Pods in root/ios if exists ---
 if [ -d "ios" ]; then
   echo "🍏 Installing CocoaPods in ios/"
