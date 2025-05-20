@@ -42,43 +42,46 @@ else
   exit 1
 fi
 
-# --- Install Pods in root/ios if exists ---
-if [ -d "ios" ]; then
-  echo "🍏 Installing CocoaPods in ios/"
-  cd ios
-  if [ -f "Podfile" ]; then
-    pod install --repo-update || { echo "❌ pod install failed in ios/"; exit 1; }
+if [ -f /usr/bin/xcodebuild ]; then
+  # --- Install Pods in root/ios if exists ---
+  if [ -d "ios" ]; then
+    echo "🍏 Installing CocoaPods in ios/"
+    cd ios
+    if [ -f "Podfile" ]; then
+      pod install --repo-update || { echo "❌ pod install failed in ios/"; exit 1; }
+    else
+      echo "ℹ️  No Podfile found in ios/, skipping pod install."
+    fi
+    cd "$ROOT_DIR"
   else
-    echo "ℹ️  No Podfile found in ios/, skipping pod install."
+    echo "ℹ️  No root ios/ directory found, skipping pod install in ios/"
   fi
-  cd "$ROOT_DIR"
-else
-  echo "ℹ️  No root ios/ directory found, skipping pod install in ios/"
-fi
 
-# --- Install Pods in example/ios if exists ---
-if [ -d "$EXAMPLE_DIR/ios" ]; then
-  echo "🍏 Installing CocoaPods in example/ios/"
-  cd "$EXAMPLE_DIR/ios"
-  if [ -f "Podfile" ]; then
-    pod install --repo-update || { echo "❌ pod install failed in example/ios/"; exit 1; }
+  # --- Install Pods in example/ios if exists ---
+  if [ -d "$EXAMPLE_DIR/ios" ]; then
+    echo "🍏 Installing CocoaPods in example/ios/"
+    cd "$EXAMPLE_DIR/ios"
+    if [ -f "Podfile" ]; then
+      pod install --repo-update || { echo "❌ pod install failed in example/ios/"; exit 1; }
+    else
+      echo "ℹ️  No Podfile found in example/ios/, skipping pod install."
+    fi
+    cd "$ROOT_DIR"
   else
-    echo "ℹ️  No Podfile found in example/ios/, skipping pod install."
+    echo "ℹ️  No example/ios/ directory found, skipping pod install in example/ios/"
   fi
-  cd "$ROOT_DIR"
-else
-  echo "ℹ️  No example/ios/ directory found, skipping pod install in example/ios/"
-fi
 
-# --- Xcode .xcode.env setup (macOS only, for example app) ---
-if [[ "$(uname)" == "Darwin" && -d "$EXAMPLE_DIR/ios" ]]; then
-  if [ ! -f "$XCODE_ENV_FILE" ]; then
-    echo "🛠️ Setting up .xcode.env with node path for Xcode integration..."
-    echo "export NODE_BINARY=$(command -v node)" > "$XCODE_ENV_FILE"
-    echo "✅ .xcode.env created at $XCODE_ENV_FILE"
-  else
-    echo "✅ .xcode.env already exists at $XCODE_ENV_FILE"
+  # --- Xcode .xcode.env setup (macOS only, for example app) ---
+  if [[ "$(uname)" == "Darwin" && -d "$EXAMPLE_DIR/ios" ]]; then
+    if [ ! -f "$XCODE_ENV_FILE" ]; then
+      echo "🛠️ Setting up .xcode.env with node path for Xcode integration..."
+      echo "export NODE_BINARY=$(command -v node)" > "$XCODE_ENV_FILE"
+      echo "✅ .xcode.env created at $XCODE_ENV_FILE"
+    else
+      echo "✅ .xcode.env already exists at $XCODE_ENV_FILE"
+    fi
   fi
+
 fi
 
 # --- Env setup marker for example app ---

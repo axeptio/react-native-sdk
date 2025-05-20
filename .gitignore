@@ -11,7 +11,12 @@ jsconfig.json
 
 # Xcode
 #
-build/
+!/example/android/build/generated/autolinking
+/example/android/build
+/example/android/app/build
+/example/ios/Build
+/android/build
+/build
 *.pbxuser
 !default.pbxuser
 *.mode1v3
