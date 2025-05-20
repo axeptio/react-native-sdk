@@ -17,6 +17,13 @@ else
   echo "Yarn not found!"
 fi
 
+# Cocoapod
+if command -v pod >/dev/null 2>&1; then
+  echo -n "Cocoapod version: " && pod --version 2>/dev/null
+else
+  echo "Cocoapod not found!"
+fi
+
 # Java
 echo -n "Java version: "
 if command -v java >/dev/null 2>&1; then
