@@ -13,7 +13,9 @@ jsconfig.json
 #
 !/example/android/build/generated/autolinking
 /example/android/build
+/example/android/app/build
 /example/ios/Build
+/android/build
 /build
 *.pbxuser
 !default.pbxuser
