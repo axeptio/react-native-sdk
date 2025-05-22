@@ -54,7 +54,7 @@ class AxeptioSdk: RCTEventEmitter {
         resolve(Axeptio.shared.axeptioToken)
     }
 
-    
+
     @objc(initialize:withClientId:withCookiesVersion:withToken:withResolver:withRejecter:)
     func initialize(
         targetService: String,
@@ -82,12 +82,13 @@ class AxeptioSdk: RCTEventEmitter {
         resolve(nil)
     }
 
-    @objc(setUserDeniedTracking:withRejecter:)
+    @objc(setUserDeniedTracking:withResolver:withRejecter:)
     func setUserDeniedTracking(
+        denied: Bool,
         resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
-        Axeptio.shared.setUserDeniedTracking()
+        Axeptio.shared.setUserDeniedTracking(denied: denied)
         resolve(nil)
     }
 
