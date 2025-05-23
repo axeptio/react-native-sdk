@@ -1,10 +1,9 @@
-name: Publish Release to npm
-
+name: Publish to npm
 # If this fails, please ensure that the NPM TOKEN is still valid
 on:
   release:
     types: [published]
-workflow_dispatch:
+  workflow_dispatch:
     inputs:
       force_publish:
         description: 'Force publish even if version already exists'
@@ -23,7 +22,7 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Check if version already published (skip if force)
-        if: ${{ !inputs.force_publish }}
+        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.force_publish }}
         run: |
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
