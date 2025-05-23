@@ -25,8 +25,8 @@ allprojects {
         maven {
             url = uri("https://maven.pkg.github.com/axeptio/axeptio-android-sdk")
             credentials {
-                username = "" // TODO: GITHUB USERNAME
-                password = "" // TODO: GITHUB TOKEN
+                username = System.getenv("GITHUB_ACTOR") ?: ""
+                password = System.getenv("GITHUB_TOKEN") ?: ""
             }
         }
     }
