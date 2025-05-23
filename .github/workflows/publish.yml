@@ -1,9 +1,16 @@
-name: Publish to npm
+name: Publish Release to npm
 
 # If this fails, please ensure that the NPM TOKEN is still valid
 on:
   release:
     types: [published]
+workflow_dispatch:
+    inputs:
+      force_publish:
+        description: 'Force publish even if version already exists'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   publish:
@@ -14,6 +21,22 @@ jobs:
 
       - name: Setup
         uses: ./.github/actions/setup
+
+      - name: Check if version already published (skip if force)
+        if: ${{ !inputs.force_publish }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
+            echo "Version $PACKAGE_VERSION already exists on npm"
+            echo "Use 'force_publish' option to override or update the version"
+            exit 1
+          else
+            echo "Version $PACKAGE_VERSION not found on npm, proceeding with publish"
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish
         run: npm publish --access public
