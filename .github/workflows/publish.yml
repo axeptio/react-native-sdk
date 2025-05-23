@@ -21,21 +21,41 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Check if version already published (skip if force)
-        if: ${{ github.event_name == 'workflow_dispatch' && !inputs.force_publish }}
+      - name: Check version and auto-increment if needed
+        id: version_check
         run: |
           PACKAGE_NAME=$(node -p "require('./package.json').name")
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
 
           if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
             echo "Version $PACKAGE_VERSION already exists on npm"
-            echo "Use 'force_publish' option to override or update the version"
-            exit 1
+
+            if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_publish }}" == "true" ]]; then
+              echo "Force publish enabled - will attempt to publish anyway"
+              echo "force_publish=true" >> $GITHUB_OUTPUT
+            else
+              echo "Auto-incrementing patch version..."
+              npm version patch --no-git-tag-version
+              NEW_VERSION=$(node -p "require('./package.json').version")
+              echo "Updated version from $PACKAGE_VERSION to $NEW_VERSION"
+              echo "version_updated=true" >> $GITHUB_OUTPUT
+              echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+            fi
           else
             echo "Version $PACKAGE_VERSION not found on npm, proceeding with publish"
+            echo "version_updated=false" >> $GITHUB_OUTPUT
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Commit version bump
+        if: steps.version_check.outputs.version_updated == 'true'
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add package.json
+          git commit -m "Bump version to ${{ steps.version_check.outputs.new_version }} [skip ci]"
+          git push
 
       - name: Publish
         run: npm publish --access public
