@@ -24,6 +24,6 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: Run release-it in dry-run mode
-        run: npx release-it --dry-run
+        run: npm publish --dry-run --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
