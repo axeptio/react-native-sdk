@@ -9,6 +9,7 @@ runs:
       with:
         node-version-file: .nvmrc
         registry-url: 'https://registry.npmjs.org'
+        cache: 'yarn'  # This will also install Yarn
 
     - name: Cache dependencies
       id: yarn-cache
