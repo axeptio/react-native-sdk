@@ -62,13 +62,18 @@ yarn add @axeptio/react-native-sdk
 - **Minimum SDK version**: 26.
 - Add the **Maven GitHub repository** and **credentials** to your **app's** `android/build.gradle` (located at the root level of your `.gradle` file).
 The snippet below is added to your `android/build.gradle` file, in the repositories block. It configures Gradle to pull the Axeptio Android SDK from a private GitHub repository.
+- Your [GITHUB_TOKEN] scopes need [read:packages, repo]
 ```gradle
-repositories {
-    maven {
-        url = uri("https://maven.pkg.github.com/axeptio/axeptio-android-sdk")
-        credentials {
-            username = "[GITHUB_USERNAME]"
-            password = "[GITHUB_TOKEN]"
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/axeptio/axeptio-android-sdk")
+            credentials {
+                username = "[GITHUB_USERNAME]"
+                password = "[GITHUB_TOKEN]"
+            }
         }
     }
 }
@@ -87,7 +92,7 @@ To initialize the **Axeptio React Native SDK** in your app, you need to set it u
 
 Here’s a step-by-step guide on how to initialize the SDK:
 ```javascript
-import { AxeptioSDK, AxeptioService } from '@axeptio/react-native-sdk';
+import AxeptioSDK, { AxeptioService } from '@axeptio/react-native-sdk';
 
 async function init() {
   try {
@@ -98,7 +103,7 @@ async function init() {
       [your_cookies_version], // Replace with your current cookies version (as defined by your platform)
       [optional_consent_token] // Optional: If available, provide an existing consent token to restore previous consent choices
     );
-  
+
     // Setup the user interface for consent management
     await AxeptioSDK.setupUI();
 
