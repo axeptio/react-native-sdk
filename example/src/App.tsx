@@ -116,7 +116,7 @@ export default function App() {
       <Pressable
         style={[styles.button, styles.clearButton]}
         onPress={() => {
-          AxeptioSDK.clearConsent().then(loadAd);
+          AxeptioSDK.clearConsent().then(() => AxeptioSDK.showConsentScreen());
         }}
       >
         <Text style={styles.label}>Clear consent</Text>
