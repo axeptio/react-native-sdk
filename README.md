@@ -169,11 +169,11 @@ async function handleATT() {
   }
 
   // If tracking is denied, update the Axeptio SDK with the user's decision
-  if (trackingStatus === 'denied') {
-    await AxeptioSDK.setUserDeniedTracking();
-  } else {
-    // If tracking is allowed, initialize the Axeptio SDK UI
-    await AxeptioSDK.setupUI();
+ if (trackingStatus !== 'not-determined') {
+  // Proceed with showing the Axeptio UI after ATT prompt
+  await AxeptioSDK.setupUI();
+}
+
   }
 }
 ```
@@ -214,11 +214,9 @@ SharedPreferences prefs = context.getSharedPreferences("axeptio", Context.MODE_P
 String consentStatus = prefs.getString("axeptioConsentStatus", "default_value");
 ```
 #### Accessing Consent Status in SDK
-To directly retrieve consent data using the **Axeptio SDK**, you can use the following methods:
-```java
-// Example in JavaScript (React Native)
-const consentStatus = await AxeptioSDK.getConsentStatus();
-```
+The React Native SDK does not currently expose a method to directly retrieve consent data.  
+To access the stored consent values, you can read from `UserDefaults` on iOS or `SharedPreferences` on Android using a native module or a library like `react-native-default-preference`.
+
 To access UserDefaults (iOS) or SharedPreferences (Android), you can utilize the [react-native-default-preference library](https://github.com/kevinresol/react-native-default-preference), which provides a unified interface for both platforms.
 <br><br><br>
 ## Show Consent Popup on Demand
