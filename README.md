@@ -31,6 +31,7 @@ The SDK is customizable for both brands and publishers, depending on your use ca
 8. [Sharing Consents with Other Web Views](#sharing-consents-with-other-web-views)
 9. [Clear Users Consent Choices](#clear-users-consent-choices)
 10. [Events](#events)
+    - [Event Source Identification](#event-source-identification)
 
 
 
@@ -168,11 +169,11 @@ async function handleATT() {
   }
 
   // If tracking is denied, update the Axeptio SDK with the user's decision
-  if (trackingStatus === 'denied') {
-    await AxeptioSDK.setUserDeniedTracking();
-  } else {
-    // If tracking is allowed, initialize the Axeptio SDK UI
-    await AxeptioSDK.setupUI();
+ if (trackingStatus !== 'not-determined') {
+  // Proceed with showing the Axeptio UI after ATT prompt
+  await AxeptioSDK.setupUI();
+}
+
   }
 }
 ```
@@ -213,11 +214,9 @@ SharedPreferences prefs = context.getSharedPreferences("axeptio", Context.MODE_P
 String consentStatus = prefs.getString("axeptioConsentStatus", "default_value");
 ```
 #### Accessing Consent Status in SDK
-To directly retrieve consent data using the **Axeptio SDK**, you can use the following methods:
-```java
-// Example in JavaScript (React Native)
-const consentStatus = await AxeptioSDK.getConsentStatus();
-```
+The React Native SDK does not currently expose a method to directly retrieve consent data.  
+To access the stored consent values, you can read from `UserDefaults` on iOS or `SharedPreferences` on Android using a native module or a library like `react-native-default-preference`.
+
 To access UserDefaults (iOS) or SharedPreferences (Android), you can utilize the [react-native-default-preference library](https://github.com/kevinresol/react-native-default-preference), which provides a unified interface for both platforms.
 <br><br><br>
 ## Show Consent Popup on Demand
@@ -273,6 +272,21 @@ const listener: AxeptioEventListener = {
 // Add the listener to the Axeptio SDK
 AxeptioSDK.addListener(listener);
 ```
+
+### Event Source Identification
+
+Events sent from the SDK (including those triggered via the internal WebView) include an `event_source` value to distinguish between App and Web contexts. This ensures analytics and KPIs are correctly attributed in the Axeptio back office.
+
+The following values are used:
+
+- `sdk-app-tcf`: TCF popup inside mobile apps.
+- `sdk-web-tcf`: TCF popup in web browsers.
+- `sdk-app-brands`: Brands widget loaded in apps.
+- `sdk-web`: Brands widget on websites.
+
+This tagging is handled automatically by the native SDK components used under the hood in the React Native module.
+
 <br><br>
+
 For more detailed information, you can visit the [Axeptio documentation](https://support.axeptio.eu/hc/en-gb ).
 We hope this guide helps you get started with the Axeptio React Native SDK. Good luck with your integration, and thank you for choosing Axeptio!
