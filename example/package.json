@@ -11,8 +11,8 @@
     "build:ios": "cd ios && xcodebuild -workspace AxeptioSdkExample.xcworkspace -scheme AxeptioSdkExample -configuration Debug -sdk iphonesimulator CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++ GCC_OPTIMIZATION_LEVEL=0 GCC_PRECOMPILE_PREFIX_HEADER=YES ASSETCATALOG_COMPILER_OPTIMIZATION=time DEBUG_INFORMATION_FORMAT=dwarf COMPILER_INDEX_STORE_ENABLE=NO"
   },
   "dependencies": {
-    "react": "19.0.0",
-    "react-native": "0.79.2",
+    "react": "^19.1.1",
+    "react-native": "^0.81.0",
     "react-native-google-mobile-ads": "^15.3.1",
     "react-native-tracking-transparency": "^0.1.2",
     "react-native-webview": "^13.13.2"
@@ -28,12 +28,12 @@
     "@react-native/eslint-config": "0.79.2",
     "@react-native/metro-config": "0.79.2",
     "@react-native/typescript-config": "0.79.2",
-    "@types/jest": "^29.5.13",
+    "@types/jest": "^30.0.0",
     "@types/react": "^19.0.0",
     "eslint": "^8.19.0",
-    "jest": "^29.6.3",
+    "jest": "^30.0.5",
     "prettier": "2.8.8",
-    "typescript": "5.0.4"
+    "typescript": "5.9.2"
   },
   "engines": {
     "node": ">=22"
