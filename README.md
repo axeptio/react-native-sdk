@@ -169,11 +169,11 @@ async function handleATT() {
   }
 
   // If tracking is denied, update the Axeptio SDK with the user's decision
- if (trackingStatus !== 'not-determined') {
-  // Proceed with showing the Axeptio UI after ATT prompt
-  await AxeptioSDK.setupUI();
-}
-
+  if (trackingStatus === 'denied') {
+    await AxeptioSDK.setUserDeniedTracking();
+  } else {
+    // If tracking is allowed, initialize the Axeptio SDK UI
+    await AxeptioSDK.setupUI();
   }
 }
 ```
