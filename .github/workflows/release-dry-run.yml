@@ -1,7 +1,12 @@
-name: Preflight Release Check
+name: Release Dry Run
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to test (leave empty for current package.json version)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -14,16 +19,168 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Configure npm for authentication
-        run: echo "//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}" > ~/.npmrc
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        with:
+          fetch-depth: 0
 
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Run release-it in dry-run mode
-        run: npm publish --dry-run --access public
+      - name: Determine version
+        id: version
+        run: |
+          if [[ -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+            echo "📝 Testing with input version: $VERSION"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            echo "📝 Testing with package.json version: $VERSION"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check current state
+        run: |
+          echo "## 📊 Current State"
+          echo ""
+          CURRENT=$(node -p "require('./package.json').version")
+          echo "📦 Package.json version: $CURRENT"
+          echo "🎯 Target version: ${{ steps.version.outputs.version }}"
+          echo ""
+          
+          # Check latest git tag
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
+          echo "🏷️  Latest git tag: $LATEST_TAG"
+          echo ""
+          
+          # Check if target version tag exists
+          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
+            echo "⚠️  Tag v${{ steps.version.outputs.version }} already exists in git"
+          else
+            echo "✅ Tag v${{ steps.version.outputs.version }} does not exist yet"
+          fi
+
+      - name: Check if version exists on npm
+        run: |
+          echo "## 🔍 NPM Registry Check"
+          echo ""
+          PACKAGE_NAME="@axeptio/react-native-sdk"
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          echo "Checking if $PACKAGE_NAME@$VERSION exists on npm..."
+          echo ""
+          
+          if npm view "$PACKAGE_NAME@$VERSION" version 2>/dev/null; then
+            echo "❌ **ERROR**: Version $VERSION already exists on npm!"
+            echo ""
+            echo "This release would fail because the version is already published."
+            echo "You need to bump the version number before releasing."
+            echo ""
+            echo "Current published versions:"
+            npm view "$PACKAGE_NAME" versions --json | tail -5
+            exit 1
+          else
+            echo "✅ **OK**: Version $VERSION is not yet published to npm"
+            echo "This version can be published."
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Validate package.json
+        run: |
+          echo "## 📋 Package Validation"
+          echo ""
+          
+          # Check required fields
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          PACKAGE_MAIN=$(node -p "require('./package.json').main")
+          
+          echo "✓ Name: $PACKAGE_NAME"
+          echo "✓ Version: $PACKAGE_VERSION"
+          echo "✓ Main: $PACKAGE_MAIN"
+          
+          # Check if all required files exist
+          echo ""
+          echo "Checking required files..."
+          if [[ -f "README.md" ]]; then
+            echo "✓ README.md exists"
+          else
+            echo "⚠️  WARNING: README.md not found"
+          fi
+          
+          if [[ -f "LICENSE" ]]; then
+            echo "✓ LICENSE exists"
+          else
+            echo "⚠️  WARNING: LICENSE not found"
+          fi
+
+      - name: Build package
+        run: |
+          echo "## 🔨 Build Test"
+          echo ""
+          echo "Running build..."
+          npm run prepare
+          echo ""
+          echo "✅ Build completed successfully"
+
+      - name: Dry run npm publish
+        run: |
+          echo "## 📦 NPM Publish Dry Run"
+          echo ""
+          echo "Simulating npm publish..."
+          npm publish --dry-run --access public 2>&1 | tee publish-output.txt
+          echo ""
+          
+          # Check package size
+          SIZE=$(cat publish-output.txt | grep "package size:" | cut -d: -f2 | xargs)
+          UNPACKED=$(cat publish-output.txt | grep "unpacked size:" | cut -d: -f2 | xargs)
+          
+          if [[ -n "$SIZE" ]]; then
+            echo "📊 Package size: $SIZE"
+            echo "📊 Unpacked size: $UNPACKED"
+          fi
+          
+          echo ""
+          echo "✅ Dry run completed successfully"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Release simulation summary
+        run: |
+          echo "## 🎬 Release Simulation Summary"
+          echo ""
+          echo "### What would happen if you release now:"
+          echo ""
+          echo "1. **Version**: \`${{ steps.version.outputs.version }}\` would be published"
+          echo "2. **Package**: \`@axeptio/react-native-sdk\`"
+          echo "3. **Registry**: npmjs.org (public)"
+          echo ""
+          
+          CURRENT=$(node -p "require('./package.json').version")
+          if [[ "$CURRENT" != "${{ steps.version.outputs.version }}" ]]; then
+            echo "4. **package.json**: Would be updated from $CURRENT to ${{ steps.version.outputs.version }}"
+            echo "5. **Git commit**: Would create commit with message: \`chore: release v${{ steps.version.outputs.version }} [skip ci]\`"
+            echo "6. **Git tag**: Would create tag \`v${{ steps.version.outputs.version }}\`"
+          else
+            echo "4. **package.json**: Already at correct version ✅"
+          fi
+          
+          echo ""
+          echo "### Next steps:"
+          echo "- If everything looks good, create a GitHub release with tag \`v${{ steps.version.outputs.version }}\`"
+          echo "- Or run the publish workflow manually from Actions tab"
+          echo ""
+          echo "✅ **Dry run successful** - Ready to release!"
+
+      - name: Failed summary
+        if: failure()
+        run: |
+          echo "## ❌ Dry Run Failed"
+          echo ""
+          echo "The release dry run failed. Please check the errors above."
+          echo ""
+          echo "Common issues:"
+          echo "- Version already exists on npm (bump version number)"
+          echo "- Build errors (fix code issues)"
+          echo "- Missing NPM_TOKEN secret (check repository settings)"
+          echo ""
+          echo "Fix the issues and run the dry run again."
