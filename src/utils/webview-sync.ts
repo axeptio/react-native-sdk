@@ -11,7 +11,7 @@ export class WebViewSyncUtils {
       token,
       timestamp: Date.now(),
       platform: Platform.OS as 'ios' | 'android',
-      hasConsent: token.length > 0,
+      hasConsent: token ? token.length > 0 : false,
     };
   }
 
