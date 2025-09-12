@@ -22,6 +22,7 @@
     },
     "android": {
       "package": "com.axeptio.example",
+      "minSdkVersion": 26,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
