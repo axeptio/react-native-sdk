@@ -65,3 +65,10 @@ The app is configured with test Ad Unit IDs from Google Mobile Ads. Update these
 - This example uses Expo Dev Client for native module support
 - The app requires prebuild or development builds to run native modules like Google Mobile Ads
 - App Tracking Transparency is iOS-specific and handled via expo-tracking-transparency
+
+## Known Limitations
+
+### Android Autolinking
+When developing locally with this monorepo setup, the Axeptio SDK may not be automatically linked on Android. You may see the error "The package '@axeptio/react-native-sdk' doesn't seem to be linked" when running on Android. This is a known limitation of React Native autolinking with local packages in a monorepo.
+
+For production apps, install the SDK from npm (`npm install @axeptio/react-native-sdk`) which will properly autolink on both iOS and Android.
