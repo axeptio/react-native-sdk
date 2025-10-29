@@ -65,8 +65,8 @@ class AxeptioSdk {
     return AxeptioSdkNative.setupUI();
   }
 
-  setUserDeniedTracking(): Promise<void> {
-    return AxeptioSdkNative.setUserDeniedTracking();
+  setUserDeniedTracking(denied: boolean = true): Promise<void> {
+    return AxeptioSdkNative.setUserDeniedTracking(denied);
   }
 
   showConsentScreen(): Promise<void> {

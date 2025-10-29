@@ -128,6 +128,9 @@ describe('AxeptioSDK', () => {
       expect(mockAxeptioSdkNative.setUserDeniedTracking).toHaveBeenCalledTimes(
         1
       );
+      expect(mockAxeptioSdkNative.setUserDeniedTracking).toHaveBeenCalledWith(
+        true
+      );
     });
 
     it('should call native appendAxeptioTokenURL method', async () => {
