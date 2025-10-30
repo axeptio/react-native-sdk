@@ -73,15 +73,18 @@ export class IOSConfigUtils {
   }
 
   /**
-   * Returns user agent modifications for better consent detection
+   * Returns user agent suffix to append for better consent detection
+   * Note: WebView userAgent prop should append this, not replace the entire UA
+   * to preserve device-specific information for environment-aware consent handling
    */
-  static getUserAgent(): string | undefined {
+  static getUserAgentSuffix(): string | undefined {
     if (Platform.OS !== 'ios') {
       return undefined;
     }
 
-    // Add identifier to help Axeptio widget detect React Native WebView context
-    return 'Mozilla/5.0 (iPhone; CPU iPhone OS like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1 AxeptioRNSDK/2.0';
+    // Return suffix to append to existing user agent
+    // This preserves real device information while adding SDK identifier
+    return ' AxeptioRNSDK/2.1.0';
   }
 
   /**

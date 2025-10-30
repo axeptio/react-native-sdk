@@ -22,31 +22,36 @@ export class WebViewSyncUtils {
   static generateConsentInjectionScript(
     consentData: WebViewConsentData
   ): string {
+    // Safely escape values to prevent XSS injection
+    const safeToken = JSON.stringify(consentData.token);
+    const safePlatform = JSON.stringify(consentData.platform);
+    const safeTimestamp = consentData.timestamp;
+
     const script = `
       (function() {
         // Axeptio iOS WebView Consent Sync - SUP-277 fix
         window.axeptioConsentSync = ${JSON.stringify(consentData)};
-        
+
         // Set token in localStorage as fallback for cookie isolation
         if (window.localStorage) {
-          window.localStorage.setItem('axeptio_token', '${consentData.token}');
-          window.localStorage.setItem('axeptio_sync_timestamp', '${consentData.timestamp}');
+          window.localStorage.setItem('axeptio_token', ${safeToken});
+          window.localStorage.setItem('axeptio_sync_timestamp', ${JSON.stringify(safeTimestamp.toString())});
         }
-        
+
         // Dispatch custom event to notify Axeptio widget
         if (window.dispatchEvent) {
           window.dispatchEvent(new CustomEvent('axeptioTokenSync', {
             detail: {
-              token: '${consentData.token}',
-              platform: '${consentData.platform}',
-              timestamp: ${consentData.timestamp}
+              token: ${safeToken},
+              platform: ${safePlatform},
+              timestamp: ${safeTimestamp}
             }
           }));
         }
-        
+
         // Set cookie with explicit domain for broader compatibility
         if (document.cookie !== undefined) {
-          document.cookie = 'axeptio_token=${consentData.token}; path=/; SameSite=None; Secure';
+          document.cookie = 'axeptio_token=' + ${safeToken} + '; path=/; SameSite=None; Secure';
         }
       })();
     `;

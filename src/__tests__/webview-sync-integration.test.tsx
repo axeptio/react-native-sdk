@@ -198,7 +198,7 @@ describe('AxeptioSDK WebView Integration', () => {
       expect(result).toEqual({
         platform: 'ios',
         platformVersion: mockPlatformVersion,
-        sdkVersion: '2.0.10',
+        sdkVersion: '2.0.11',
         hasToken: true,
         webViewSupport: {
           cookieSyncCapable: false,

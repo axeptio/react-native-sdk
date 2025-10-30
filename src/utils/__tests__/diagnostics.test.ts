@@ -28,7 +28,7 @@ describe('DiagnosticsUtils', () => {
       expect(result).toEqual({
         platform: 'ios',
         platformVersion: 'iOS17.0',
-        sdkVersion: '2.0.10',
+        sdkVersion: '2.0.11',
         hasToken: true,
         webViewSupport: {
           cookieSyncCapable: false,
@@ -186,7 +186,7 @@ describe('DiagnosticsUtils', () => {
       const diagnostic = {
         platform: 'ios' as const,
         platformVersion: 'iOS17.0',
-        sdkVersion: '2.0.10',
+        sdkVersion: '2.0.11',
         hasToken: true,
         webViewSupport: {
           cookieSyncCapable: false,
@@ -200,7 +200,7 @@ describe('DiagnosticsUtils', () => {
         '=== Axeptio React Native SDK Diagnostic Report ==='
       );
       expect(report).toContain('Platform: ios iOS17.0');
-      expect(report).toContain('SDK Version: 2.0.10');
+      expect(report).toContain('SDK Version: 2.0.11');
       expect(report).toContain('Token Available: Yes');
       expect(report).toContain('WebView Cookie Sync: Limited');
       expect(report).toContain('Storage Isolation: Yes (iOS WKWebView)');
@@ -214,7 +214,7 @@ describe('DiagnosticsUtils', () => {
       const diagnostic = {
         platform: 'android' as const,
         platformVersion: 'Android 13',
-        sdkVersion: '2.0.10',
+        sdkVersion: '2.0.11',
         hasToken: false,
         webViewSupport: {
           cookieSyncCapable: true,

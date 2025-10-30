@@ -76,7 +76,7 @@ describe('WebViewSyncUtils', () => {
 
     it('should handle special characters in token', () => {
       const consentData: WebViewConsentData = {
-        token: 'safe-token-123',
+        token: 'test\'with"quotes\nand\\backslash',
         timestamp: Date.now(),
         platform: 'ios',
         hasConsent: true,
@@ -85,10 +85,13 @@ describe('WebViewSyncUtils', () => {
       const script =
         WebViewSyncUtils.generateConsentInjectionScript(consentData);
 
-      // Should create valid JavaScript
+      // Should create valid JavaScript that safely escapes special chars
       // eslint-disable-next-line no-new-func
       expect(() => new Function(script)).not.toThrow();
-      expect(script).toContain('safe-token-123');
+      // Token should be properly escaped in the script
+      expect(script).toContain("test'with");
+      expect(script).toContain('quotes');
+      expect(script).toContain('backslash');
     });
 
     it('should include platform and timestamp in custom event', () => {

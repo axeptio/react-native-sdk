@@ -139,21 +139,19 @@ describe('IOSConfigUtils', () => {
     });
   });
 
-  describe('getUserAgent', () => {
-    it('should return iOS-specific user agent for iOS platform', () => {
-      const userAgent = IOSConfigUtils.getUserAgent();
+  describe('getUserAgentSuffix', () => {
+    it('should return user agent suffix for iOS platform', () => {
+      const suffix = IOSConfigUtils.getUserAgentSuffix();
 
-      expect(userAgent).toBe(
-        'Mozilla/5.0 (iPhone; CPU iPhone OS like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1 AxeptioRNSDK/2.0'
-      );
+      expect(suffix).toBe(' AxeptioRNSDK/2.1.0');
     });
 
     it('should return undefined for Android platform', () => {
       (Platform as any).OS = 'android';
 
-      const userAgent = IOSConfigUtils.getUserAgent();
+      const suffix = IOSConfigUtils.getUserAgentSuffix();
 
-      expect(userAgent).toBeUndefined();
+      expect(suffix).toBeUndefined();
     });
   });
 
@@ -184,7 +182,6 @@ describe('IOSConfigUtils', () => {
 
         const config = IOSConfigUtils.getOptimizedWebViewConfig();
         const props = IOSConfigUtils.getWebViewProps();
-        const userAgent = IOSConfigUtils.getUserAgent();
 
         // Configuration should be consistent across iOS versions
         expect(config.incognito).toBe(false);
@@ -195,9 +192,10 @@ describe('IOSConfigUtils', () => {
         expect(props.incognito).toBe(config.incognito);
         expect(props.cacheEnabled).toBe(config.cacheEnabled);
 
-        // User agent should be defined for iOS
-        expect(userAgent).toBeDefined();
-        expect(userAgent).toContain('AxeptioRNSDK');
+        // User agent suffix should be defined for iOS
+        const userAgentSuffix = IOSConfigUtils.getUserAgentSuffix();
+        expect(userAgentSuffix).toBeDefined();
+        expect(userAgentSuffix).toContain('AxeptioRNSDK');
       });
     });
   });

@@ -66,7 +66,11 @@ class AxeptioSdk {
   }
 
   setUserDeniedTracking(denied: boolean = true): Promise<void> {
-    return AxeptioSdkNative.setUserDeniedTracking(denied);
+    // Android bridge doesn't accept parameters (iOS-only feature)
+    if (Platform.OS === 'ios') {
+      return AxeptioSdkNative.setUserDeniedTracking(denied);
+    }
+    return AxeptioSdkNative.setUserDeniedTracking();
   }
 
   showConsentScreen(): Promise<void> {

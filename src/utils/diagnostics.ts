@@ -18,7 +18,7 @@ export class DiagnosticsUtils {
     return {
       platform: Platform.OS as 'ios' | 'android',
       platformVersion,
-      sdkVersion: '2.0.10', // TODO: Get from package.json
+      sdkVersion: '2.0.11',
       hasToken: token.length > 0,
       webViewSupport: this.getWebViewSupportInfo(),
     };
