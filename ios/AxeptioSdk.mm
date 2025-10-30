@@ -21,7 +21,8 @@ RCT_EXTERN_METHOD(initialize:(NSString)clientId
 RCT_EXTERN_METHOD(setupUI:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
-RCT_EXTERN_METHOD(setUserDeniedTracking:(RCTPromiseResolveBlock)resolve
+RCT_EXTERN_METHOD(setUserDeniedTracking:(BOOL)denied
+                  withResolver:(RCTPromiseResolveBlock)resolve
                   withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(showConsentScreen:(RCTPromiseResolveBlock)resolve

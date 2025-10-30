@@ -29,8 +29,13 @@ The SDK is customizable for both brands and publishers, depending on your use ca
 6. [Get Stored Consents](#get-stored-consents)
 7. [Show Consent Popup on Demand](#show-consent-popup-on-demand)
 8. [Sharing Consents with Other Web Views](#sharing-consents-with-other-web-views)
-9. [Clear Users Consent Choices](#clear-users-consent-choices)
-10. [Events](#events)
+9. [iOS WebView Consent Synchronization](#ios-webview-consent-synchronization)
+   - [Understanding the iOS Cookie Isolation Issue](#understanding-the-ios-cookie-isolation-issue)
+   - [Token-based Synchronization](#token-based-synchronization)
+   - [Optimized WebView Configuration](#optimized-webview-configuration)
+   - [Troubleshooting and Diagnostics](#troubleshooting-and-diagnostics)
+10. [Clear Users Consent Choices](#clear-users-consent-choices)
+11. [Events](#events)
     - [Event Source Identification](#event-source-identification)
 
 
@@ -241,6 +246,158 @@ const url = await AxeptioSdk.appendAxeptioTokenURL(
 // The resulting URL will be:
 // https://myurl.com?axeptio_token=[token]
 ```
+<br><br><br>
+## iOS WebView Consent Synchronization
+
+### Understanding the iOS Cookie Isolation Issue
+
+Starting with iOS 14, Apple's WKWebView uses isolated cookie storage that doesn't reliably synchronize with the native app's cookie storage (`NSHTTPCookieStorage`). This affects consent state synchronization between:
+
+- Native SDK consent popups (`AxeptioSDK.showConsentScreen()`)
+- WebView-based implementations loading Axeptio widgets
+
+**Symptoms:**
+- Consent granted via native popup not recognized in WebView
+- Consent granted in WebView not recognized by native SDK  
+- Widget not appearing on physical iOS devices (works in simulators)
+- Erratic popup behavior with dual WebView/native implementations
+
+### Token-based Synchronization
+
+The recommended solution is token-based synchronization instead of relying on cookies:
+
+#### Basic Usage
+
+```javascript
+import AxeptioSDK from '@axeptio/react-native-sdk';
+
+// Get consent data for WebView synchronization
+const consentData = await AxeptioSDK.getConsentDataForWebView();
+
+// Generate JavaScript injection code
+const injectionScript = await AxeptioSDK.getWebViewInjectionScript();
+
+// Use with WebView
+<WebView
+  source={{ uri: 'https://your-website.com' }}
+  injectedJavaScript={injectionScript}
+  onMessage={(event) => {
+    const result = AxeptioSDK.validateWebViewSyncResult(event.nativeEvent.data);
+    if (result.success) {
+      console.log('Consent synchronized successfully');
+    }
+  }}
+/>
+```
+
+#### URL-based Token Synchronization
+
+For cases where JavaScript injection isn't sufficient:
+
+```javascript
+// Add token parameters to URL
+const tokenizedUrl = await AxeptioSDK.syncConsentWithWebView('https://your-website.com');
+
+<WebView source={{ uri: tokenizedUrl }} />
+```
+
+### Optimized WebView Configuration
+
+Use iOS-optimized WebView configuration to maximize consent synchronization reliability:
+
+#### Automatic Configuration
+
+```javascript
+import AxeptioSDK from '@axeptio/react-native-sdk';
+
+// Apply all recommended iOS settings automatically
+<WebView
+  {...AxeptioSDK.getWebViewProps()}
+  source={{ uri: 'https://your-website.com' }}
+/>
+```
+
+#### Manual Configuration
+
+```javascript
+import { IOSConfigUtils } from '@axeptio/react-native-sdk';
+
+const config = IOSConfigUtils.getOptimizedWebViewConfig();
+
+<WebView
+  incognito={config.incognito}           // false - enable cookie sharing
+  cacheEnabled={config.cacheEnabled}     // false - prevent stale consent state  
+  sharedCookiesEnabled={config.sharedCookiesEnabled} // true - attempt cookie sync
+  source={{ uri: 'https://your-website.com' }}
+/>
+```
+
+### Troubleshooting and Diagnostics
+
+#### Run Diagnostic Tests
+
+```javascript
+// Get comprehensive diagnostic information
+const diagnostics = await AxeptioSDK.getDiagnosticInfo();
+console.log(diagnostics);
+
+// Test WebView cookie synchronization capability
+const testResult = await AxeptioSDK.testWebViewCookieSync();
+console.log('Test passed:', testResult.passed);
+console.log('Details:', testResult.details);
+console.log('Recommendations:', testResult.recommendations);
+```
+
+#### WebView Capability Testing
+
+Inject capability test script to validate WebView functionality:
+
+```javascript
+const capabilityScript = AxeptioSDK.getWebViewCapabilityTestScript();
+
+<WebView
+  source={{ uri: 'https://your-website.com' }}
+  injectedJavaScript={capabilityScript}
+  onMessage={(event) => {
+    const data = JSON.parse(event.nativeEvent.data);
+    if (data.type === 'axeptio_webview_capability_test') {
+      console.log('WebView capabilities:', data.results);
+    }
+  }}
+/>
+```
+
+#### Common Solutions
+
+1. **Widget not appearing on iOS physical devices:**
+   ```javascript
+   // Use native-only approach on problematic iOS versions
+   import { IOSConfigUtils } from '@axeptio/react-native-sdk';
+   
+   if (IOSConfigUtils.isProblematicIOSVersion()) {
+     // Show native popup instead
+     AxeptioSDK.showConsentScreen();
+   } else {
+     // Use WebView with proper sync
+     const script = await AxeptioSDK.getWebViewInjectionScript();
+     // ... configure WebView with script
+   }
+   ```
+
+2. **Dual WebView/Native conflicts:**
+   ```javascript
+   // Remove custom WebView implementations, use SDK methods only
+   await AxeptioSDK.initialize(/* ... */);
+   await AxeptioSDK.setupUI();
+   AxeptioSDK.showConsentScreen(); // Native popup only
+   ```
+
+3. **React version compatibility issues:**
+   Ensure all components use compatible React versions:
+   - App: React 19.x
+   - SDK: React 19.x
+   - Widget-client: React 19.x (if using WebView)
+
 <br><br><br>
 ## Clear Users Consent Choices
 To clear the consent choices stored by the SDK, use the following method:
