@@ -84,7 +84,7 @@ export class IOSConfigUtils {
 
     // Return suffix to append to existing user agent
     // This preserves real device information while adding SDK identifier
-    return ' AxeptioRNSDK/2.1.0';
+    return ' AxeptioRNSDK/2.0.11';
   }
 
   /**

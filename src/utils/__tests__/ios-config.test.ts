@@ -143,7 +143,7 @@ describe('IOSConfigUtils', () => {
     it('should return user agent suffix for iOS platform', () => {
       const suffix = IOSConfigUtils.getUserAgentSuffix();
 
-      expect(suffix).toBe(' AxeptioRNSDK/2.1.0');
+      expect(suffix).toBe(' AxeptioRNSDK/2.0.11');
     });
 
     it('should return undefined for Android platform', () => {
