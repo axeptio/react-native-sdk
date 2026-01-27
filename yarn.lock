@@ -49,7 +49,7 @@ __metadata:
     eslint-plugin-prettier: ^5.2.3
     jest: ^30.0.5
     prettier: ^3.5.3
-    react: ^19.1.1
+    react: 19.1.4
     react-native: ^0.81.0
     react-native-builder-bob: ^0.40.13
     release-it: ^15.11.0
@@ -11116,10 +11116,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^19.1.1":
-  version: 19.1.1
-  resolution: "react@npm:19.1.1"
-  checksum: f2f18fea5deac87b1167365bd5160bcba64d383c26a37afa905b714ca424f423ef97d8daf53f041ab9ac25a06357fafcf0b5d3b6b84c9d1eace0e621bfeae629
+"react@npm:19.1.4":
+  version: 19.1.4
+  resolution: "react@npm:19.1.4"
+  checksum: 6b4fb102b9723df56fc5d30a46c9f9ed9435422c7df4eb55617d2fa7eaf9d527ee63f827b261608fad5946e4d88fb708240bd9fe01f08d62851ec090b4233462
   languageName: node
   linkType: hard
 
