@@ -113,7 +113,7 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READONLY }}
 
       - name: Build package
         run: |
@@ -154,7 +154,7 @@ jobs:
           npm publish --tag ${{ steps.npm_tag.outputs.tag }} --access public
           echo "✅ Successfully published @axeptio/react-native-sdk@${{ steps.version.outputs.version }} to npm"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READWRITE }}
 
       - name: Skip publish notification
         if: steps.npm_check.outputs.exists == 'true'

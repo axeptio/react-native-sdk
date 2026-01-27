@@ -1,7 +1,7 @@
 name: Check NPM Token Access
 
 # To run locally on OS X with (brew install act):
-# add your secret to a .secrets file (NPM_TOKEN=<...>)
+# add your secret to a .secrets file (NPM_TOKEN_READWRITE=<...>)
 # then: act -j check-npm-token --secret-file .secrets --container-architecture linux/amd64
 on:
   workflow_dispatch:
@@ -22,14 +22,14 @@ jobs:
           node-version: '22'
 
       - name: Configure npm authentication
-        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN_READWRITE}" > ~/.npmrc
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN_READWRITE: ${{ secrets.NPM_TOKEN_READWRITE }}
 
       - name: Run npm whoami
         run: npm whoami
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN_READWRITE: ${{ secrets.NPM_TOKEN_READWRITE }}
 
       # This step is needed when running with act to ensure yarn is available
       - name: Install Yarn
@@ -45,4 +45,4 @@ jobs:
           echo "🔍 Simulating publish to check access..."
           npm publish --dry-run --access public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN_READWRITE: ${{ secrets.NPM_TOKEN_READWRITE }}
