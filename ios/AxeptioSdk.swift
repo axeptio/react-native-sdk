@@ -66,9 +66,9 @@ class AxeptioSdk: RCTEventEmitter {
     ) -> Void {
         let targetService = AxeptioServiceHelper.fromString(targetService)
         if token.isEmpty {
-            Axeptio.shared.initialize(targetService: targetService,clientId: clientId, cookiesVersion: cookiesVersion)
+            Axeptio.shared.initialize(targetService: targetService, clientId: clientId, cookiesVersion: cookiesVersion, widgetType: .production)
         } else {
-            Axeptio.shared.initialize(targetService: targetService,clientId: clientId, cookiesVersion: cookiesVersion, token: token)
+            Axeptio.shared.initialize(targetService: targetService, clientId: clientId, cookiesVersion: cookiesVersion, token: token, widgetType: .production)
         }
         resolve(nil)
     }
