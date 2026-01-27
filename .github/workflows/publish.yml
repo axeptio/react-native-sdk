@@ -1,63 +1,172 @@
 name: Publish to npm
-# If this fails, please ensure that the NPM TOKEN is still valid
+
 on:
   release:
     types: [published]
   workflow_dispatch:
     inputs:
-      force_publish:
-        description: 'Force publish even if version already exists'
+      version:
+        description: 'Version to publish (leave empty to auto-detect from package.json)'
         required: false
-        default: false
-        type: boolean
+        type: string
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Clone repository
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          # CRITICAL: When triggered by release, checkout master to avoid detached HEAD
+          ref: ${{ github.event_name == 'release' && 'master' || github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.BOT_GPG_PRIVATE_KEY }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
+          git_tag_gpgsign: true
+          git_config_global: true
+          git_committer_name: axeptio-bot
+          git_committer_email: ${{ secrets.BOT_EMAIL }}
+      
+      - name: Configure Git
+        run: |
+          git config --global commit.gpgsign true
+          git config --global tag.gpgsign true
+          git config --global user.signingkey ${{ steps.import_gpg.outputs.keyid }}
+          git config --global user.name "axeptio-bot"
+          git config --global user.email "${{ secrets.BOT_EMAIL }}"
+          # Set remote URL with bot token
+          git remote set-url origin https://x-access-token:${{ secrets.BOT_GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
 
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Check version and auto-increment if needed
-        id: version_check
+      - name: Determine version
+        id: version
         run: |
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
-          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          if [[ -n "${{ inputs.version }}" ]]; then
+            VERSION="${{ inputs.version }}"
+            echo "Using input version: $VERSION"
+          elif [[ "${{ github.event_name }}" == "release" ]]; then
+            # Extract version from release tag
+            VERSION="${{ github.event.release.tag_name }}"
+            VERSION="${VERSION#v}" # Remove 'v' prefix if present
+            echo "Using release tag version: $VERSION"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            echo "Using package.json version: $VERSION"
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "✅ Publishing version: $VERSION"
 
-          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version 2>/dev/null; then
-            echo "Version $PACKAGE_VERSION already exists on npm"
+      - name: Update package.json if needed
+        id: update_package
+        run: |
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          TARGET_VERSION="${{ steps.version.outputs.version }}"
+          
+          if [[ "$CURRENT_VERSION" != "$TARGET_VERSION" ]]; then
+            echo "📝 Updating package.json from $CURRENT_VERSION to $TARGET_VERSION"
+            npm version $TARGET_VERSION --no-git-tag-version
+            
+            git add package.json
+            git commit -S -m "chore: release v$TARGET_VERSION [skip ci]"
+            git push origin HEAD:master
+            
+            echo "updated=true" >> $GITHUB_OUTPUT
+            echo "✅ package.json updated and pushed to master"
+          else
+            echo "✅ package.json already at version $TARGET_VERSION"
+            echo "updated=false" >> $GITHUB_OUTPUT
+          fi
 
-            if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.force_publish }}" == "true" ]]; then
-              echo "Force publish enabled - will attempt to publish anyway"
-              echo "force_publish=true" >> $GITHUB_OUTPUT
-            else
-              echo "Auto-incrementing patch version..."
-              npm version patch --no-git-tag-version
-              NEW_VERSION=$(node -p "require('./package.json').version")
-              echo "Updated version from $PACKAGE_VERSION to $NEW_VERSION"
-              echo "version_updated=true" >> $GITHUB_OUTPUT
-              echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+      - name: Check if version exists on npm
+        id: npm_check
+        run: |
+          PACKAGE_NAME="@axeptio/react-native-sdk"
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          echo "🔍 Checking if $PACKAGE_NAME@$VERSION exists on npm..."
+          
+          if npm view "$PACKAGE_NAME@$VERSION" version 2>/dev/null; then
+            echo "⚠️  Version $VERSION already exists on npm"
+            echo "exists=true" >> $GITHUB_OUTPUT
+            
+            # If workflow_dispatch, this might be intentional
+            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+              echo "⚠️  Note: Republishing existing version via manual trigger"
             fi
           else
-            echo "Version $PACKAGE_VERSION not found on npm, proceeding with publish"
-            echo "version_updated=false" >> $GITHUB_OUTPUT
+            echo "✅ Version $VERSION not found on npm - ready to publish"
+            echo "exists=false" >> $GITHUB_OUTPUT
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Commit version bump
-        if: steps.version_check.outputs.version_updated == 'true'
+      - name: Build package
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add package.json
-          git commit -m "Bump version to ${{ steps.version_check.outputs.new_version }} [skip ci]"
-          git push
+          echo "📦 Building package..."
+          npm run prepare
+          echo "✅ Build complete"
 
-      - name: Publish
-        run: npm publish --access public
+      - name: Publish to npm
+        if: steps.npm_check.outputs.exists != 'true'
+        run: |
+          echo "🚀 Publishing to npm..."
+          npm publish --access public
+          echo "✅ Successfully published @axeptio/react-native-sdk@${{ steps.version.outputs.version }} to npm"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Skip publish notification
+        if: steps.npm_check.outputs.exists == 'true'
+        run: |
+          echo "⏭️  Skipping npm publish - version ${{ steps.version.outputs.version }} already exists"
+          echo "To force publish a new version, update package.json version first"
+
+      - name: Create/Update GitHub tag if needed
+        if: steps.update_package.outputs.updated == 'true'
+        run: |
+          TAG_NAME="v${{ steps.version.outputs.version }}"
+          
+          echo "🏷️  Checking tag $TAG_NAME..."
+          
+          # Check if tag exists locally
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "Tag $TAG_NAME already exists locally"
+          else
+            echo "Creating signed tag $TAG_NAME"
+            git tag -s "$TAG_NAME" -m "Release $TAG_NAME"
+            git push origin "$TAG_NAME"
+            echo "✅ Tag $TAG_NAME created and pushed"
+          fi
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 📊 Release Summary"
+          echo "- **Version**: ${{ steps.version.outputs.version }}"
+          echo "- **Package**: @axeptio/react-native-sdk"
+          echo "- **Trigger**: ${{ github.event_name }}"
+          if [[ "${{ steps.update_package.outputs.updated }}" == "true" ]]; then
+            echo "- **package.json**: Updated ✅"
+          else
+            echo "- **package.json**: Already up-to-date ✅"
+          fi
+          if [[ "${{ steps.npm_check.outputs.exists }}" == "true" ]]; then
+            echo "- **NPM Publish**: Skipped (version exists) ⏭️"
+          else
+            echo "- **NPM Publish**: Success ✅"
+          fi

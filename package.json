@@ -1,6 +1,6 @@
 {
   "name": "@axeptio/react-native-sdk",
-  "version": "2.0.9",
+  "version": "2.0.11",
   "description": "Axeptio react native sdk for presenting cookies consent to the user",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -68,7 +68,7 @@
     "eslint-plugin-prettier": "^5.2.3",
     "jest": "^30.0.5",
     "prettier": "^3.5.3",
-    "react": "^19.1.1",
+    "react": "19.1.4",
     "react-native": "^0.81.0",
     "react-native-builder-bob": "^0.40.13",
     "release-it": "^15.11.0",
