@@ -125,6 +125,61 @@ class AxeptioSdk: RCTEventEmitter {
         resolve(result.absoluteString)
     }
 
+    // MARK: - TCF Vendor Consent APIs (MSK-93)
+
+    @objc(getVendorConsents:withRejecter:)
+    func getVendorConsents(
+        resolve: RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) -> Void {
+        do {
+            let vendorConsents = try Axeptio.shared.getVendorConsents()
+            resolve(vendorConsents)
+        } catch {
+            reject("GET_VENDOR_CONSENTS_ERROR", "Failed to get vendor consents", error)
+        }
+    }
+
+    @objc(getConsentedVendors:withRejecter:)
+    func getConsentedVendors(
+        resolve: RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) -> Void {
+        do {
+            let consentedVendors = try Axeptio.shared.getConsentedVendors()
+            resolve(consentedVendors)
+        } catch {
+            reject("GET_CONSENTED_VENDORS_ERROR", "Failed to get consented vendors", error)
+        }
+    }
+
+    @objc(getRefusedVendors:withRejecter:)
+    func getRefusedVendors(
+        resolve: RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) -> Void {
+        do {
+            let refusedVendors = try Axeptio.shared.getRefusedVendors()
+            resolve(refusedVendors)
+        } catch {
+            reject("GET_REFUSED_VENDORS_ERROR", "Failed to get refused vendors", error)
+        }
+    }
+
+    @objc(isVendorConsented:withResolver:withRejecter:)
+    func isVendorConsented(
+        vendorId: String,
+        resolve: RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) -> Void {
+        do {
+            let isConsented = try Axeptio.shared.isVendorConsented(vendorId: vendorId)
+            resolve(isConsented)
+        } catch {
+            reject("IS_VENDOR_CONSENTED_ERROR", "Failed to check vendor consent for \(vendorId)", error)
+        }
+    }
+
 }
 
 extension GoogleConsentV2 {

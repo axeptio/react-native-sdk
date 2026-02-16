@@ -141,6 +141,30 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
     promise.resolve(response.toString())
   }
 
+  // MSK-93: Consent Debug Information API
+  @ReactMethod
+  fun getConsentDebugInfo(preferenceKey: String?, promise: Promise) {
+    try {
+      val debugInfo = AxeptioSDK.instance().getConsentDebugInfo(preferenceKey)
+      val writableMap = WritableNativeMap()
+
+      debugInfo.forEach { (key, value) ->
+        when (value) {
+          null -> writableMap.putNull(key)
+          is String -> writableMap.putString(key, value)
+          is Int -> writableMap.putInt(key, value)
+          is Double -> writableMap.putDouble(key, value)
+          is Boolean -> writableMap.putBoolean(key, value)
+          else -> writableMap.putString(key, value.toString())
+        }
+      }
+
+      promise.resolve(writableMap)
+    } catch (e: Exception) {
+      promise.reject("GET_CONSENT_DEBUG_INFO_ERROR", "Failed to get consent debug info: ${e.message}", e)
+    }
+  }
+
   @ReactMethod
   fun addListener(eventName: String?) {
 

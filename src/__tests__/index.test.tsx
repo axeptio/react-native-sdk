@@ -210,6 +210,126 @@ describe('AxeptioSDK', () => {
     });
   });
 
+  describe('TCF Vendor Consent APIs (iOS)', () => {
+    beforeEach(() => {
+      // Ensure we're on iOS for these tests
+      jest.requireMock('react-native').Platform.OS = 'ios';
+    });
+
+    it('should call native getVendorConsents on iOS', async () => {
+      const mockVendorConsents = { '1': true, '2': false };
+      mockAxeptioSdkNative.getVendorConsents = jest
+        .fn()
+        .mockResolvedValue(mockVendorConsents);
+
+      const result = await AxeptioSDK.getVendorConsents();
+
+      expect(result).toEqual(mockVendorConsents);
+      expect(mockAxeptioSdkNative.getVendorConsents).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call native getConsentedVendors on iOS', async () => {
+      const mockConsentedVendors = ['1', '3', '5'];
+      mockAxeptioSdkNative.getConsentedVendors = jest
+        .fn()
+        .mockResolvedValue(mockConsentedVendors);
+
+      const result = await AxeptioSDK.getConsentedVendors();
+
+      expect(result).toEqual(mockConsentedVendors);
+      expect(mockAxeptioSdkNative.getConsentedVendors).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call native getRefusedVendors on iOS', async () => {
+      const mockRefusedVendors = ['2', '4', '6'];
+      mockAxeptioSdkNative.getRefusedVendors = jest
+        .fn()
+        .mockResolvedValue(mockRefusedVendors);
+
+      const result = await AxeptioSDK.getRefusedVendors();
+
+      expect(result).toEqual(mockRefusedVendors);
+      expect(mockAxeptioSdkNative.getRefusedVendors).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call native isVendorConsented on iOS', async () => {
+      const vendorId = '123';
+      mockAxeptioSdkNative.isVendorConsented = jest
+        .fn()
+        .mockResolvedValue(true);
+
+      const result = await AxeptioSDK.isVendorConsented(vendorId);
+
+      expect(result).toBe(true);
+      expect(mockAxeptioSdkNative.isVendorConsented).toHaveBeenCalledWith(
+        vendorId
+      );
+    });
+
+    it('should reject TCF methods on Android', async () => {
+      jest.requireMock('react-native').Platform.OS = 'android';
+
+      await expect(AxeptioSDK.getVendorConsents()).rejects.toThrow(
+        'only available on iOS'
+      );
+      await expect(AxeptioSDK.getConsentedVendors()).rejects.toThrow(
+        'only available on iOS'
+      );
+      await expect(AxeptioSDK.getRefusedVendors()).rejects.toThrow(
+        'only available on iOS'
+      );
+      await expect(AxeptioSDK.isVendorConsented('123')).rejects.toThrow(
+        'only available on iOS'
+      );
+    });
+  });
+
+  describe('Consent Debug Info API (Android)', () => {
+    beforeEach(() => {
+      jest.requireMock('react-native').Platform.OS = 'android';
+    });
+
+    it('should call native getConsentDebugInfo on Android', async () => {
+      const mockDebugInfo = {
+        preference_key_1: 'value1',
+        preference_key_2: 'value2',
+      };
+      mockAxeptioSdkNative.getConsentDebugInfo = jest
+        .fn()
+        .mockResolvedValue(mockDebugInfo);
+
+      const result = await AxeptioSDK.getConsentDebugInfo();
+
+      expect(result).toEqual(mockDebugInfo);
+      expect(mockAxeptioSdkNative.getConsentDebugInfo).toHaveBeenCalledWith(
+        null
+      );
+    });
+
+    it('should call native getConsentDebugInfo with specific key on Android', async () => {
+      const preferenceKey = 'specific_key';
+      const mockDebugInfo = { specific_key: 'specific_value' };
+      mockAxeptioSdkNative.getConsentDebugInfo = jest
+        .fn()
+        .mockResolvedValue(mockDebugInfo);
+
+      const result = await AxeptioSDK.getConsentDebugInfo(preferenceKey);
+
+      expect(result).toEqual(mockDebugInfo);
+      expect(mockAxeptioSdkNative.getConsentDebugInfo).toHaveBeenCalledWith(
+        preferenceKey
+      );
+    });
+
+    it('should reject getConsentDebugInfo on iOS', async () => {
+      jest.requireMock('react-native').Platform.OS = 'ios';
+
+      await expect(AxeptioSDK.getConsentDebugInfo()).rejects.toThrow(
+        'only available on Android'
+      );
+    });
+  });
+
   describe('Error Handling', () => {
     it('should handle native method errors gracefully', async () => {
       const error = new Error('Native method failed');
