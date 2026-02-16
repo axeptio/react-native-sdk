@@ -35,6 +35,24 @@ describe('AxeptioSDK', () => {
     jest.clearAllMocks();
   });
 
+  describe('Platform-Specific Behavior', () => {
+    it('should handle setUserDeniedTracking on Android', async () => {
+      // Temporarily mock Android platform
+      const originalPlatform = jest.requireMock('react-native').Platform.OS;
+      jest.requireMock('react-native').Platform.OS = 'android';
+
+      mockAxeptioSdkNative.setUserDeniedTracking.mockResolvedValue(undefined);
+
+      await AxeptioSDK.setUserDeniedTracking(true);
+
+      // Android version shouldn't pass the parameter
+      expect(mockAxeptioSdkNative.setUserDeniedTracking).toHaveBeenCalledWith();
+
+      // Restore platform
+      jest.requireMock('react-native').Platform.OS = originalPlatform;
+    });
+  });
+
   describe('Core SDK Methods', () => {
     it('should call native getPlaformVersion method', async () => {
       const mockVersion = 'iOS17.0';
