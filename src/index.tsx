@@ -85,6 +85,84 @@ class AxeptioSdk {
     return AxeptioSdkNative.appendAxeptioTokenURL(url, token);
   }
 
+  // MSK-93: TCF Vendor Consent APIs (iOS only)
+
+  /**
+   * Get all vendor consent data (iOS only)
+   * Returns vendor consent information for TCF compliance
+   * @platform iOS
+   * @returns Promise resolving to vendor consents object
+   */
+  getVendorConsents(): Promise<Record<string, any>> {
+    if (Platform.OS !== 'ios') {
+      return Promise.reject(
+        new Error('getVendorConsents is only available on iOS')
+      );
+    }
+    return AxeptioSdkNative.getVendorConsents();
+  }
+
+  /**
+   * Get list of consented vendor IDs (iOS only)
+   * @platform iOS
+   * @returns Promise resolving to array of consented vendor IDs
+   */
+  getConsentedVendors(): Promise<string[]> {
+    if (Platform.OS !== 'ios') {
+      return Promise.reject(
+        new Error('getConsentedVendors is only available on iOS')
+      );
+    }
+    return AxeptioSdkNative.getConsentedVendors();
+  }
+
+  /**
+   * Get list of refused vendor IDs (iOS only)
+   * @platform iOS
+   * @returns Promise resolving to array of refused vendor IDs
+   */
+  getRefusedVendors(): Promise<string[]> {
+    if (Platform.OS !== 'ios') {
+      return Promise.reject(
+        new Error('getRefusedVendors is only available on iOS')
+      );
+    }
+    return AxeptioSdkNative.getRefusedVendors();
+  }
+
+  /**
+   * Check if a specific vendor has been consented to (iOS only)
+   * @platform iOS
+   * @param vendorId - The vendor ID to check
+   * @returns Promise resolving to true if vendor is consented, false otherwise
+   */
+  isVendorConsented(vendorId: string): Promise<boolean> {
+    if (Platform.OS !== 'ios') {
+      return Promise.reject(
+        new Error('isVendorConsented is only available on iOS')
+      );
+    }
+    return AxeptioSdkNative.isVendorConsented(vendorId);
+  }
+
+  // MSK-93: Consent Debug Information API (Android only)
+
+  /**
+   * Get comprehensive consent debug information (Android only)
+   * Combines SharedPreferences and consent file data for troubleshooting
+   * @platform Android
+   * @param preferenceKey - Optional specific preference key to query, or null for all data
+   * @returns Promise resolving to debug information map
+   */
+  getConsentDebugInfo(preferenceKey?: string): Promise<Record<string, any>> {
+    if (Platform.OS !== 'android') {
+      return Promise.reject(
+        new Error('getConsentDebugInfo is only available on Android')
+      );
+    }
+    return AxeptioSdkNative.getConsentDebugInfo(preferenceKey ?? null);
+  }
+
   // SUP-277: iOS WebView synchronization methods
 
   /**
