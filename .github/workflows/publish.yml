@@ -113,7 +113,7 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READONLY }}
 
       - name: Build package
         run: |
@@ -121,14 +121,40 @@ jobs:
           npm run prepare
           echo "✅ Build complete"
 
+      - name: Determine npm tag
+        id: npm_tag
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+
+          # Check if version contains prerelease identifiers
+          if [[ "$VERSION" =~ -beta\. ]]; then
+            NPM_TAG="beta"
+            echo "📦 Detected beta version - will publish to 'beta' tag"
+          elif [[ "$VERSION" =~ -alpha\. ]]; then
+            NPM_TAG="alpha"
+            echo "📦 Detected alpha version - will publish to 'alpha' tag"
+          elif [[ "$VERSION" =~ -rc\. ]]; then
+            NPM_TAG="rc"
+            echo "📦 Detected rc version - will publish to 'rc' tag"
+          elif [[ "$VERSION" =~ - ]]; then
+            NPM_TAG="next"
+            echo "📦 Detected prerelease version - will publish to 'next' tag"
+          else
+            NPM_TAG="latest"
+            echo "📦 Stable version - will publish to 'latest' tag"
+          fi
+
+          echo "tag=$NPM_TAG" >> $GITHUB_OUTPUT
+          echo "✅ NPM tag: $NPM_TAG"
+
       - name: Publish to npm
         if: steps.npm_check.outputs.exists != 'true'
         run: |
-          echo "🚀 Publishing to npm..."
-          npm publish --access public
+          echo "🚀 Publishing to npm with tag '${{ steps.npm_tag.outputs.tag }}'..."
+          npm publish --tag ${{ steps.npm_tag.outputs.tag }} --access public
           echo "✅ Successfully published @axeptio/react-native-sdk@${{ steps.version.outputs.version }} to npm"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READWRITE }}
 
       - name: Skip publish notification
         if: steps.npm_check.outputs.exists == 'true'

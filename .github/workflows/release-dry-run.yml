@@ -82,7 +82,7 @@ jobs:
             echo "This version can be published."
           fi
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READONLY }}
 
       - name: Validate package.json
         run: |
@@ -142,7 +142,7 @@ jobs:
           echo ""
           echo "✅ Dry run completed successfully"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READONLY }}
 
       - name: Release simulation summary
         run: |
@@ -181,6 +181,6 @@ jobs:
           echo "Common issues:"
           echo "- Version already exists on npm (bump version number)"
           echo "- Build errors (fix code issues)"
-          echo "- Missing NPM_TOKEN secret (check repository settings)"
+          echo "- Missing NPM_TOKEN_READONLY or NPM_TOKEN_READWRITE secret (check repository settings)"
           echo ""
           echo "Fix the issues and run the dry run again."

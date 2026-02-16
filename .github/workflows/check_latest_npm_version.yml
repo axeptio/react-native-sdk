@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '22'
 
       - name: Create .npmrc for npm auth
         run: |
@@ -25,7 +25,7 @@ jobs:
 
       - name: Show latest published version of @axeptio/react-native-sdk
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READONLY }}
         run: |
           echo "🔍 Fetching latest version..."
           npm show @axeptio/react-native-sdk@latest version --registry https://registry.npmjs.org/

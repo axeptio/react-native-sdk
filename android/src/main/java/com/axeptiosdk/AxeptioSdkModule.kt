@@ -15,6 +15,7 @@ import io.axept.android.googleconsent.GoogleConsentType
 import io.axept.android.library.AxeptioEventListener
 import io.axept.android.library.AxeptioSDK
 import io.axept.android.library.AxeptioService
+import io.axept.android.library.WidgetType
 
 class AxeptioSdkModule(reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -92,9 +93,9 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
     }
     currentActivity.runOnUiThread {
       if (token.isNotEmpty()) {
-        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, token)
+        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, token, WidgetType.PRODUCTION)
       } else {
-        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion)
+        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, WidgetType.PRODUCTION)
       }
       promise.resolve(null)
     }
