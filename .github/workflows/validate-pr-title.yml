@@ -1,0 +1,14 @@
+name: Validate PR Title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  validate:
+    name: Validate PR title
+    uses: axeptio/tech-scripts/.github/workflows/validate-pull-request-title.yml@master
