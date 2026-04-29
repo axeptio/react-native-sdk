@@ -128,6 +128,16 @@ export default function App() {
       >
         <Text style={styles.label}>Show webview with token</Text>
       </Pressable>
+      <Pressable
+        style={styles.button}
+        onPress={async () => {
+          const status = await AxeptioSDK.getConsentStatus();
+          console.log('Consent Status:', status);
+          alert(`Consent Status: ${status ?? 'null (no consent yet)'}`);
+        }}
+      >
+        <Text style={styles.label}>Get Consent Status</Text>
+      </Pressable>
       <TokenModal
         modalVisible={tokenModalVisible}
         setModalVisible={setTokenModalVisible}

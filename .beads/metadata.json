@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "react_native_sdk",
+  "project_id": "7ff31619-2cc3-40e9-b66d-9de5a2168487"
+}

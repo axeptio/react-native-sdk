@@ -47,6 +47,16 @@ class AxeptioSdk {
     return AxeptioSdkNative.getAxeptioToken();
   }
 
+  /**
+   * Get the stored consent status
+   * Returns the consent status string stored by the Axeptio SDK
+   * Available on both iOS and Android
+   * @returns Promise resolving to consent status string, or null if not set
+   */
+  getConsentStatus(): Promise<string | null> {
+    return AxeptioSdkNative.getConsentStatus();
+  }
+
   initialize(
     targetService: AxeptioService,
     clientId: string,
@@ -265,6 +275,7 @@ enum AxeptioEvent {
   onPopupClosedEvent = 'onPopupClosedEvent',
   onConsentCleared = 'onConsentCleared',
   onGoogleConsentModeUpdate = 'onGoogleConsentModeUpdate',
+  onError = 'onError',
 }
 
 export enum AxeptioService {
@@ -276,6 +287,7 @@ export type AxeptioEventListener = {
   [AxeptioEvent.onPopupClosedEvent]?: () => void;
   [AxeptioEvent.onConsentCleared]?: () => void;
   [AxeptioEvent.onGoogleConsentModeUpdate]?: (consent: GoogleConsentV2) => void;
+  [AxeptioEvent.onError]?: (message: string) => void;
 };
 
 export type GoogleConsentV2 = {

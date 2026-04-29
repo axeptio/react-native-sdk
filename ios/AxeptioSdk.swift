@@ -125,6 +125,15 @@ class AxeptioSdk: RCTEventEmitter {
         resolve(result.absoluteString)
     }
 
+    @objc(getConsentStatus:withRejecter:)
+    func getConsentStatus(
+        resolve: RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) -> Void {
+        let consentStatus = UserDefaults.standard.string(forKey: "axeptioConsentStatus")
+        resolve(consentStatus)
+    }
+
     // MARK: - TCF Vendor Consent APIs (MSK-93)
 
     @objc(getVendorConsents:withRejecter:)

@@ -9,6 +9,7 @@ import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.WritableNativeMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
+import android.content.Context
 import android.net.Uri
 import io.axept.android.googleconsent.GoogleConsentStatus
 import io.axept.android.googleconsent.GoogleConsentType
@@ -46,6 +47,12 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
         reactContext
           .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
           .emit("onConsentCleared", null)
+      }
+
+      override fun onError(message: String) {
+        reactContext
+          .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+          .emit("onError", message)
       }
     }
 
@@ -139,6 +146,17 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
     val uri = Uri.parse(url)
     var response = AxeptioSDK.instance().appendAxeptioToken(uri, token)
     promise.resolve(response.toString())
+  }
+
+  @ReactMethod
+  fun getConsentStatus(promise: Promise) {
+    try {
+      val prefs = reactApplicationContext.getSharedPreferences("axeptio", Context.MODE_PRIVATE)
+      val consentStatus = prefs.getString("axeptioConsentStatus", null)
+      promise.resolve(consentStatus)
+    } catch (e: Exception) {
+      promise.reject("GET_CONSENT_STATUS_ERROR", "Failed to get consent status: ${e.message}", e)
+    }
   }
 
   // MSK-93: Consent Debug Information API
