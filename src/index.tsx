@@ -47,6 +47,16 @@ class AxeptioSdk {
     return AxeptioSdkNative.getAxeptioToken();
   }
 
+  /**
+   * Get the stored consent status
+   * Returns the consent status string stored by the Axeptio SDK
+   * Available on both iOS and Android
+   * @returns Promise resolving to consent status string, or null if not set
+   */
+  getConsentStatus(): Promise<string | null> {
+    return AxeptioSdkNative.getConsentStatus();
+  }
+
   initialize(
     targetService: AxeptioService,
     clientId: string,

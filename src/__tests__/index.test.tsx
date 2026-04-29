@@ -18,6 +18,7 @@ jest.mock('react-native', () => ({
       clearConsent: jest.fn(),
       setUserDeniedTracking: jest.fn(),
       appendAxeptioTokenURL: jest.fn(),
+      getConsentStatus: jest.fn(),
     },
   },
   NativeEventEmitter: jest.fn().mockImplementation(() => ({
@@ -165,6 +166,27 @@ describe('AxeptioSDK', () => {
         url,
         token
       );
+    });
+
+    it('should call native getConsentStatus method', async () => {
+      const mockConsentStatus = 'consent-data-string';
+      mockAxeptioSdkNative.getConsentStatus.mockResolvedValue(
+        mockConsentStatus
+      );
+
+      const result = await AxeptioSDK.getConsentStatus();
+
+      expect(result).toBe(mockConsentStatus);
+      expect(mockAxeptioSdkNative.getConsentStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle null consent status', async () => {
+      mockAxeptioSdkNative.getConsentStatus.mockResolvedValue(null);
+
+      const result = await AxeptioSDK.getConsentStatus();
+
+      expect(result).toBeNull();
+      expect(mockAxeptioSdkNative.getConsentStatus).toHaveBeenCalledTimes(1);
     });
   });
 
