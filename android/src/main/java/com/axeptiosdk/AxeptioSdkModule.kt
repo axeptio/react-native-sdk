@@ -48,6 +48,12 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
           .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
           .emit("onConsentCleared", null)
       }
+
+      override fun onError(message: String) {
+        reactContext
+          .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+          .emit("onError", message)
+      }
     }
 
     axeptioEventListener?.let { AxeptioSDK.instance().setEventListener(it) }

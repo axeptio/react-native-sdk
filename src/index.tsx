@@ -275,6 +275,7 @@ enum AxeptioEvent {
   onPopupClosedEvent = 'onPopupClosedEvent',
   onConsentCleared = 'onConsentCleared',
   onGoogleConsentModeUpdate = 'onGoogleConsentModeUpdate',
+  onError = 'onError',
 }
 
 export enum AxeptioService {
@@ -286,6 +287,7 @@ export type AxeptioEventListener = {
   [AxeptioEvent.onPopupClosedEvent]?: () => void;
   [AxeptioEvent.onConsentCleared]?: () => void;
   [AxeptioEvent.onGoogleConsentModeUpdate]?: (consent: GoogleConsentV2) => void;
+  [AxeptioEvent.onError]?: (message: string) => void;
 };
 
 export type GoogleConsentV2 = {
