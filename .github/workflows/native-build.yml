@@ -70,10 +70,9 @@ jobs:
 
       - name: Build for iOS simulator
         working-directory: example-expo/ios
+        # Raw xcodebuild output: xcbeautify's renderer interleaves and drops
+        # the error detail needed to diagnose CI-only failures.
         run: |
-          # xcbeautify ships on GitHub macOS images; install as a fallback
-          command -v xcbeautify >/dev/null || brew install xcbeautify
-          set -o pipefail
           xcodebuild \
             -workspace AxeptioSdkExample.xcworkspace \
             -scheme AxeptioSdkExample \
@@ -81,4 +80,4 @@ jobs:
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO \
-            build | xcbeautify --renderer github-actions
+            build
