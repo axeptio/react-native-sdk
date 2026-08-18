@@ -11,6 +11,7 @@
   "dependencies": {
     "@axeptio/react-native-sdk": "file:..",
     "expo": "~57.0.14",
+    "expo-build-properties": "~57.0.12",
     "expo-dev-client": "~57.0.13",
     "expo-status-bar": "~57.0.1",
     "expo-tracking-transparency": "~57.0.1",

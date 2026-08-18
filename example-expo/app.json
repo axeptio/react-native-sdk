@@ -22,7 +22,6 @@
     },
     "android": {
       "package": "com.axeptio.example",
-      "minSdkVersion": 26,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -36,6 +35,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "./plugins/withAxeptioMaven",
       "expo-dev-client",
       "expo-tracking-transparency",
       [
@@ -43,6 +43,14 @@
         {
           "androidAppId": "ca-app-pub-3940256099942544~1033173712",
           "iosAppId": "ca-app-pub-3940256099942544~4411468910"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
         }
       ]
     ]
