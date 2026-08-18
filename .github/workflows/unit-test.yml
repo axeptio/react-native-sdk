@@ -1,9 +1,9 @@
 name: CI
 
+# No branches filter: '*' does not match slash-containing base branches
+# (e.g. stacked PRs based on chore/foo), which silently skipped CI there.
 on:
   pull_request:
-    branches:
-      - '*'
 
 jobs:
   lint:
