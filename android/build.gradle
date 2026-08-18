@@ -21,9 +21,12 @@ def isNewArchitectureEnabled() {
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
 
-if (isNewArchitectureEnabled()) {
-  apply plugin: "com.facebook.react"
-}
+// Note: the com.facebook.react plugin is intentionally NOT applied here.
+// This module has no codegenConfig (it is an old-architecture NativeModule
+// reached through the new-arch interop layer); applying the plugin makes
+// codegen emit every discovered component's classes into this library,
+// which then clash with the packages that legitimately own them at dex
+// merge time.
 
 def getExtOrDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties["AxeptioSdk_" + name]

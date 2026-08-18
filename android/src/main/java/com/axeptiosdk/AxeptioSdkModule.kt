@@ -102,7 +102,7 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
       if (token.isNotEmpty()) {
         AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, token, WidgetType.PRODUCTION)
       } else {
-        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, WidgetType.PRODUCTION)
+        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, widgetType = WidgetType.PRODUCTION)
       }
       promise.resolve(null)
     }
