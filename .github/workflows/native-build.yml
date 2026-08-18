@@ -2,8 +2,6 @@ name: Native Build
 
 on:
   pull_request:
-    branches:
-      - '*'
 
 concurrency:
   group: native-build-${{ github.ref }}
