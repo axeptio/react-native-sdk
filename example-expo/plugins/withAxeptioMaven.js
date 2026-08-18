@@ -16,10 +16,16 @@ const MAVEN_BLOCK = `
 module.exports = function withAxeptioMaven(config) {
   return withProjectBuildGradle(config, (cfg) => {
     if (!cfg.modResults.contents.includes('maven.pkg.github.com/axeptio')) {
-      cfg.modResults.contents = cfg.modResults.contents.replace(
+      const updated = cfg.modResults.contents.replace(
         /(allprojects\s*\{\s*repositories\s*\{)/,
         `$1${MAVEN_BLOCK}`
       );
+      if (updated === cfg.modResults.contents) {
+        throw new Error(
+          'withAxeptioMaven: could not find the allprojects { repositories { … } } block in android/build.gradle — the Axeptio maven repository was not injected'
+        );
+      }
+      cfg.modResults.contents = updated;
     }
     return cfg;
   });

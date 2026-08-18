@@ -168,7 +168,7 @@ class AxeptioSdk: RCTEventEmitter {
         resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
-        guard let vendorIdInt = Int(vendorId) else {
+        guard let vendorIdInt = Int(vendorId.trimmingCharacters(in: .whitespacesAndNewlines)) else {
             reject("IS_VENDOR_CONSENTED_ERROR", "Invalid vendor id: \(vendorId)", nil)
             return
         }
