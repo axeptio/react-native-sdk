@@ -18,12 +18,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: 'npm'
-          cache-dependency-path: example-expo/package-lock.json
+      # Installs root dependencies too: the example's file:.. dependency runs
+      # the library's prepare script (bob build) during npm ci.
+      - name: Setup
+        uses: ./.github/actions/setup
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -53,12 +51,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: 'npm'
-          cache-dependency-path: example-expo/package-lock.json
+      # Installs root dependencies too: the example's file:.. dependency runs
+      # the library's prepare script (bob build) during npm ci.
+      - name: Setup
+        uses: ./.github/actions/setup
 
       - name: Install example dependencies
         working-directory: example-expo
