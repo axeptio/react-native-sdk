@@ -67,13 +67,22 @@ yarn add @axeptio/react-native-sdk
 #### Android Setup
 
 - **Minimum SDK version**: 26.
-- The Axeptio Android SDK is published on **Maven Central** (`io.axept.android:android-sdk`). No extra repository or credentials are required — `mavenCentral()` is already part of the default React Native template:
+- Add the **Maven GitHub repository** and **credentials** to your **app's** `android/build.gradle` (located at the root level of your `.gradle` file).
+  The snippet below is added to your `android/build.gradle` file, in the repositories block. It configures Gradle to pull the Axeptio Android SDK from a private GitHub repository.
+- Your [GITHUB_TOKEN] scopes need [read:packages, repo]
 
 ```gradle
 allprojects {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/axeptio/axeptio-android-sdk")
+            credentials {
+                username = "[GITHUB_USERNAME]"
+                password = "[GITHUB_TOKEN]"
+            }
+        }
     }
 }
 ```
