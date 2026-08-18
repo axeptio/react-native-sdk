@@ -80,6 +80,16 @@ android {
 repositories {
   mavenCentral()
   google()
+  // The Axeptio Android SDK is published on GitHub Packages, which requires
+  // authentication even for public packages. Consumers provide a GitHub token
+  // via gradle properties or environment (GITHUB_ACTOR/GITHUB_TOKEN in CI).
+  maven {
+    url = uri("https://maven.pkg.github.com/axeptio/axeptio-android-sdk")
+    credentials {
+      username = project.findProperty("GITHUB_USERNAME") ?: System.getenv("GITHUB_USERNAME") ?: System.getenv("GITHUB_ACTOR") ?: ""
+      password = project.findProperty("GITHUB_TOKEN") ?: System.getenv("GITHUB_TOKEN") ?: ""
+    }
+  }
 }
 
 def kotlin_version = getExtOrDefault("kotlinVersion")
