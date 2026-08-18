@@ -65,11 +65,11 @@ class AxeptioSdk: RCTEventEmitter {
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
         let targetService = AxeptioServiceHelper.fromString(targetService)
-        if token.isEmpty {
-            Axeptio.shared.initialize(targetService: targetService, clientId: clientId, cookiesVersion: cookiesVersion, widgetType: .production)
-        } else {
-            Axeptio.shared.initialize(targetService: targetService, clientId: clientId, cookiesVersion: cookiesVersion, token: token, widgetType: .production)
+        if !token.isEmpty {
+            // SDK >= 2.2.0 takes the token via configure() instead of an initialize overload
+            Axeptio.shared.configure(token: token)
         }
+        Axeptio.shared.initialize(targetService: targetService, clientId: clientId, cookiesVersion: cookiesVersion, widgetType: .production)
         resolve(nil)
     }
 
@@ -141,12 +141,9 @@ class AxeptioSdk: RCTEventEmitter {
         resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
-        do {
-            let vendorConsents = try Axeptio.shared.getVendorConsents()
-            resolve(vendorConsents)
-        } catch {
-            reject("GET_VENDOR_CONSENTS_ERROR", "Failed to get vendor consents", error)
-        }
+        let vendorConsents = Axeptio.shared.getVendorConsents()
+            .reduce(into: [String: Bool]()) { $0[String($1.key)] = $1.value }
+        resolve(vendorConsents)
     }
 
     @objc(getConsentedVendors:withRejecter:)
@@ -154,12 +151,7 @@ class AxeptioSdk: RCTEventEmitter {
         resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
-        do {
-            let consentedVendors = try Axeptio.shared.getConsentedVendors()
-            resolve(consentedVendors)
-        } catch {
-            reject("GET_CONSENTED_VENDORS_ERROR", "Failed to get consented vendors", error)
-        }
+        resolve(Axeptio.shared.getConsentedVendors().map { String($0) })
     }
 
     @objc(getRefusedVendors:withRejecter:)
@@ -167,12 +159,7 @@ class AxeptioSdk: RCTEventEmitter {
         resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
-        do {
-            let refusedVendors = try Axeptio.shared.getRefusedVendors()
-            resolve(refusedVendors)
-        } catch {
-            reject("GET_REFUSED_VENDORS_ERROR", "Failed to get refused vendors", error)
-        }
+        resolve(Axeptio.shared.getRefusedVendors().map { String($0) })
     }
 
     @objc(isVendorConsented:withResolver:withRejecter:)
@@ -181,12 +168,11 @@ class AxeptioSdk: RCTEventEmitter {
         resolve: RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) -> Void {
-        do {
-            let isConsented = try Axeptio.shared.isVendorConsented(vendorId: vendorId)
-            resolve(isConsented)
-        } catch {
-            reject("IS_VENDOR_CONSENTED_ERROR", "Failed to check vendor consent for \(vendorId)", error)
+        guard let vendorIdInt = Int(vendorId.trimmingCharacters(in: .whitespacesAndNewlines)) else {
+            reject("IS_VENDOR_CONSENTED_ERROR", "Invalid vendor id: \(vendorId)", nil)
+            return
         }
+        resolve(Axeptio.shared.isVendorConsented(vendorIdInt))
     }
 
 }
