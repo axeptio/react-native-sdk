@@ -71,6 +71,8 @@ jobs:
       - name: Build for iOS simulator
         working-directory: example-expo/ios
         run: |
+          # xcbeautify ships on GitHub macOS images; install as a fallback
+          command -v xcbeautify >/dev/null || brew install xcbeautify
           set -o pipefail
           xcodebuild \
             -workspace AxeptioSdkExample.xcworkspace \
