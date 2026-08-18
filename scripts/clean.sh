@@ -17,7 +17,8 @@ npm cache clean --force
 # 3. Watchman, Metro, and Babel cache clear
 echo "🧼 Clearing Metro, Babel, & Watchman caches..."
 watchman watch-del-all 2>/dev/null
-rm -rf $TMPDIR/metro-* $TMPDIR/haste-map-* /tmp/metro-* /tmp/haste-map-*
+TMP_CACHE_DIR="${TMPDIR:-/tmp}"
+rm -rf "${TMP_CACHE_DIR%/}"/metro-* "${TMP_CACHE_DIR%/}"/haste-map-* /tmp/metro-* /tmp/haste-map-*
 rm -rf .babel.*
 rm -rf .expo example-expo/.expo
 
