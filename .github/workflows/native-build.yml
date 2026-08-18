@@ -46,7 +46,9 @@ jobs:
         run: ./gradlew assembleDebug --no-daemon
 
   ios:
-    runs-on: macos-15
+    # Expo 57's ExpoModulesJSI needs Swift tools 6.2 (Xcode 26); the macos-15
+    # image defaults to Xcode 16.4 / Swift 6.1.
+    runs-on: macos-26
     steps:
       - name: Checkout
         uses: actions/checkout@v4
