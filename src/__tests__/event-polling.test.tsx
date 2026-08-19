@@ -1,7 +1,8 @@
 /**
  * Covers the iOS promise-channel event transport: when the native module
- * exposes pollEvents, the SDK long-polls it and fans results out to
- * registered listeners (the legacy NativeEventEmitter path is bypassed).
+ * exposes pollEvents, the SDK long-polls it (starting with the first
+ * addListener) and fans results out to registered listeners; the legacy
+ * NativeEventEmitter path is bypassed.
  */
 jest.mock('react-native', () => ({
   Platform: {
@@ -20,7 +21,12 @@ jest.mock('react-native', () => ({
 }));
 
 describe('iOS event polling transport', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it('delivers polled events to listeners, tolerates empty batches and errors', async () => {
+    jest.useFakeTimers();
     const { NativeModules, NativeEventEmitter } = require('react-native');
     const pollEvents = NativeModules.AxeptioSdk.pollEvents as jest.Mock;
 
@@ -44,18 +50,21 @@ describe('iOS event polling transport', () => {
       sdk = require('../index').default;
     });
 
+    // The loop only starts with the first listener registration.
+    expect(pollEvents).not.toHaveBeenCalled();
+
     const onPopupClosedEvent = jest.fn();
     const onGoogleConsentModeUpdate = jest.fn();
     sdk.addListener({ onPopupClosedEvent, onGoogleConsentModeUpdate });
 
-    // First batch arrives on the microtask queue.
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    // Flush the first batch, the empty batch and the rejection (which
+    // schedules the 1s backoff timer).
+    await jest.advanceTimersByTimeAsync(0);
     expect(onPopupClosedEvent).toHaveBeenCalledTimes(1);
     expect(onGoogleConsentModeUpdate).toHaveBeenCalledWith({ adStorage: true });
 
-    // Empty batch and the rejection (1s backoff) are consumed, then the loop
-    // re-arms with a pending poll.
-    await new Promise((resolve) => setTimeout(resolve, 1100));
+    // After the backoff elapses the loop re-arms with a pending poll.
+    await jest.advanceTimersByTimeAsync(1000);
     expect(pollEvents.mock.calls.length).toBeGreaterThanOrEqual(4);
 
     // The legacy emitter path must not be used when pollEvents exists.

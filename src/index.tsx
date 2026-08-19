@@ -28,19 +28,10 @@ const AxeptioSdkNative = NativeModules.AxeptioSdk
 
 class AxeptioSdk {
   private listeners: AxeptioEventListener[] = [];
+  private pollingStarted = false;
 
   constructor() {
-    if (
-      Platform.OS === 'ios' &&
-      typeof AxeptioSdkNative.pollEvents === 'function'
-    ) {
-      // On iOS, events are collected over the promise channel: the legacy
-      // RCTEventEmitter -> NativeEventEmitter delivery path never reaches the
-      // JS runtime on RN 0.86 (whichever architecture), while promise
-      // resolution is reliable. pollEvents long-polls: it resolves as soon as
-      // the native side has at least one event, and is then re-armed.
-      this.startEventPolling();
-    } else {
+    if (!this.usesEventPolling()) {
       const emitter = new NativeEventEmitter(AxeptioSdkNative);
       Object.keys(AxeptioEvent).forEach((event) => {
         emitter.addListener(event, (body: any) => {
@@ -48,6 +39,19 @@ class AxeptioSdk {
         });
       });
     }
+  }
+
+  // On iOS, events are collected over the promise channel: the legacy
+  // RCTEventEmitter -> NativeEventEmitter delivery path never reaches the
+  // JS runtime on RN 0.86 (whichever architecture), while promise
+  // resolution is reliable. pollEvents long-polls: it resolves as soon as
+  // the native side has at least one event, and is then re-armed. The loop
+  // starts lazily with the first addListener(); until then events buffer
+  // on the native side.
+  private usesEventPolling(): boolean {
+    return (
+      Platform.OS === 'ios' && typeof AxeptioSdkNative.pollEvents === 'function'
+    );
   }
 
   private async startEventPolling(): Promise<void> {
@@ -288,6 +292,10 @@ class AxeptioSdk {
 
   addListener(listener: AxeptioEventListener) {
     this.listeners.push(listener);
+    if (!this.pollingStarted && this.usesEventPolling()) {
+      this.pollingStarted = true;
+      this.startEventPolling();
+    }
   }
 
   removeListeners() {
