@@ -26,17 +26,45 @@ const AxeptioSdkNative = NativeModules.AxeptioSdk
       }
     );
 
-const EventEmitter = new NativeEventEmitter(AxeptioSdkNative);
-
 class AxeptioSdk {
   private listeners: AxeptioEventListener[] = [];
+  private pollingStarted = false;
 
   constructor() {
-    Object.keys(AxeptioEvent).forEach((event) => {
-      EventEmitter.addListener(event, (body: any) => {
-        this.sendEvent(event as AxeptioEvent, body);
+    if (!this.usesEventPolling()) {
+      const emitter = new NativeEventEmitter(AxeptioSdkNative);
+      Object.keys(AxeptioEvent).forEach((event) => {
+        emitter.addListener(event, (body: any) => {
+          this.sendEvent(event as AxeptioEvent, body);
+        });
       });
-    });
+    }
+  }
+
+  // On iOS, events are collected over the promise channel: the legacy
+  // RCTEventEmitter -> NativeEventEmitter delivery path never reaches the
+  // JS runtime on RN 0.86 (whichever architecture), while promise
+  // resolution is reliable. pollEvents long-polls: it resolves as soon as
+  // the native side has at least one event, and is then re-armed. The loop
+  // starts lazily with the first addListener(); until then events buffer
+  // on the native side.
+  private usesEventPolling(): boolean {
+    return (
+      Platform.OS === 'ios' && typeof AxeptioSdkNative.pollEvents === 'function'
+    );
+  }
+
+  private async startEventPolling(): Promise<void> {
+    for (;;) {
+      try {
+        const events: { name: AxeptioEvent; body?: any }[] =
+          await AxeptioSdkNative.pollEvents();
+        events.forEach((event) => this.sendEvent(event.name, event.body));
+      } catch {
+        // Native side unavailable (e.g. reload); back off before retrying.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
   }
 
   getPlaformVersion(): Promise<string> {
@@ -264,6 +292,10 @@ class AxeptioSdk {
 
   addListener(listener: AxeptioEventListener) {
     this.listeners.push(listener);
+    if (!this.pollingStarted && this.usesEventPolling()) {
+      this.pollingStarted = true;
+      this.startEventPolling();
+    }
   }
 
   removeListeners() {

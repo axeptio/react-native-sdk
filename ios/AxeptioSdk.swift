@@ -5,34 +5,84 @@ class AxeptioSdk: RCTEventEmitter {
 
     private let axeptioEventListener = AxeptioEventListener()
 
+    // Events are delivered to JS over the promise channel (pollEvents) instead
+    // of RCTEventEmitter.sendEvent: the legacy RCTDeviceEventEmitter delivery
+    // path never reaches the JS runtime on RN 0.86 (any architecture), while
+    // promise resolution works reliably. Events are buffered here until JS
+    // collects them with the long-poll below.
+    private var pendingEvents: [[String: Any]] = []
+    private var eventWaiter: RCTPromiseResolveBlock?
+    private var sdkListenerRegistered = false
+
     override init() {
         super.init()
 
         axeptioEventListener.onPopupClosedEvent = { [weak self] in
-            guard let self else { return }
-            self.sendEvent(withName: "onPopupClosedEvent", body: nil)
+            self?.queueEvent("onPopupClosedEvent", nil)
         }
 
         axeptioEventListener.onConsentCleared = { [weak self] in
-            guard let self else { return }
-            self.sendEvent(withName: "onConsentCleared", body: nil)
+            self?.queueEvent("onConsentCleared", nil)
         }
 
         axeptioEventListener.onGoogleConsentModeUpdate = { [weak self] consents in
-            guard let self else { return }
-            self.sendEvent(withName: "onGoogleConsentModeUpdate", body: consents.toJSObject())
+            self?.queueEvent("onGoogleConsentModeUpdate", consents.toJSObject())
         }
 
         axeptioEventListener.onError = { [weak self] message in
-            guard let self else { return }
-            self.sendEvent(withName: "onError", body: message)
+            self?.queueEvent("onError", message)
         }
-
-        Axeptio.shared.setEventListener(axeptioEventListener)
     }
 
     deinit {
         Axeptio.shared.removeEventListener(axeptioEventListener)
+    }
+
+    private func queueEvent(_ name: String, _ body: Any?) {
+        DispatchQueue.main.async {
+            var event: [String: Any] = ["name": name]
+            if let body { event["body"] = body }
+            if let waiter = self.eventWaiter {
+                self.eventWaiter = nil
+                waiter([event])
+            } else {
+                self.pendingEvents.append(event)
+            }
+        }
+    }
+
+    private func ensureSdkListenerRegistered() {
+        DispatchQueue.main.async {
+            if !self.sdkListenerRegistered {
+                self.sdkListenerRegistered = true
+                Axeptio.shared.setEventListener(self.axeptioEventListener)
+            }
+        }
+    }
+
+    /// Long-poll for native SDK events. Resolves with an array of
+    /// {name, body?} objects as soon as at least one event is available; a
+    /// superseded poll resolves with an empty array.
+    @objc(pollEvents:withRejecter:)
+    func pollEvents(
+        resolve: @escaping RCTPromiseResolveBlock,
+        reject: @escaping RCTPromiseRejectBlock
+    ) -> Void {
+        ensureSdkListenerRegistered()
+        DispatchQueue.main.async {
+            if !self.pendingEvents.isEmpty {
+                let events = self.pendingEvents
+                self.pendingEvents = []
+                resolve(events)
+            } else {
+                self.eventWaiter?([])
+                self.eventWaiter = resolve
+            }
+        }
+    }
+
+    override func startObserving() {
+        ensureSdkListenerRegistered()
     }
 
     @objc open override func supportedEvents() -> [String] {
@@ -76,10 +126,6 @@ class AxeptioSdk: RCTEventEmitter {
             Axeptio.shared.configure(token: token)
         }
         Axeptio.shared.initialize(targetService: targetService, clientId: clientId, cookiesVersion: cookiesVersion, widgetType: .production)
-        // initialize() resets the SDK's listener state, so the registration done
-        // in init() is lost if it ran first — re-register (official sample sets
-        // the listener only after initialize).
-        Axeptio.shared.setEventListener(axeptioEventListener)
         resolve(nil)
     }
 

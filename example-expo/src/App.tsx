@@ -74,6 +74,9 @@ export default function App() {
           // Do something
           console.log('Consent cleared');
         },
+        onError: (message) => {
+          console.log('Event: onError', message);
+        },
         onGoogleConsentModeUpdate: (_consents) => {
           // The Google Consent V2 status
           console.log('Event: onGoogleConsentModeUpdate', _consents);
