@@ -23,6 +23,11 @@ class AxeptioSdk: RCTEventEmitter {
             self.sendEvent(withName: "onGoogleConsentModeUpdate", body: consents.toJSObject())
         }
 
+        axeptioEventListener.onError = { [weak self] message in
+            guard let self else { return }
+            self.sendEvent(withName: "onError", body: message)
+        }
+
         Axeptio.shared.setEventListener(axeptioEventListener)
     }
 
@@ -35,6 +40,7 @@ class AxeptioSdk: RCTEventEmitter {
             "onPopupClosedEvent",
             "onConsentCleared",
             "onGoogleConsentModeUpdate",
+            "onError",
         ]
     }
 
@@ -70,6 +76,10 @@ class AxeptioSdk: RCTEventEmitter {
             Axeptio.shared.configure(token: token)
         }
         Axeptio.shared.initialize(targetService: targetService, clientId: clientId, cookiesVersion: cookiesVersion, widgetType: .production)
+        // initialize() resets the SDK's listener state, so the registration done
+        // in init() is lost if it ran first — re-register (official sample sets
+        // the listener only after initialize).
+        Axeptio.shared.setEventListener(axeptioEventListener)
         resolve(nil)
     }
 

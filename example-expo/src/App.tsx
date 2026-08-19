@@ -66,6 +66,7 @@ export default function App() {
       const listener: AxeptioEventListener = {
         onPopupClosedEvent: () => {
           // The CMP notice is being hidden
+          console.log('Event: onPopupClosedEvent');
           loadAd();
         },
         onConsentCleared: () => {
@@ -75,7 +76,7 @@ export default function App() {
         },
         onGoogleConsentModeUpdate: (_consents) => {
           // The Google Consent V2 status
-          // Do something
+          console.log('Event: onGoogleConsentModeUpdate', _consents);
         },
       };
       AxeptioSDK.addListener(listener);
