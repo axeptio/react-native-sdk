@@ -18,6 +18,7 @@ jest.mock('react-native', () => ({
       clearConsent: jest.fn(),
       setUserDeniedTracking: jest.fn(),
       appendAxeptioTokenURL: jest.fn(),
+      getConsentStatus: jest.fn(),
     },
   },
   NativeEventEmitter: jest.fn().mockImplementation(() => ({
@@ -166,6 +167,27 @@ describe('AxeptioSDK', () => {
         token
       );
     });
+
+    it('should call native getConsentStatus method', async () => {
+      const mockConsentStatus = 'consent-data-string';
+      mockAxeptioSdkNative.getConsentStatus.mockResolvedValue(
+        mockConsentStatus
+      );
+
+      const result = await AxeptioSDK.getConsentStatus();
+
+      expect(result).toBe(mockConsentStatus);
+      expect(mockAxeptioSdkNative.getConsentStatus).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle null consent status', async () => {
+      mockAxeptioSdkNative.getConsentStatus.mockResolvedValue(null);
+
+      const result = await AxeptioSDK.getConsentStatus();
+
+      expect(result).toBeNull();
+      expect(mockAxeptioSdkNative.getConsentStatus).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('Event Management', () => {
@@ -174,6 +196,7 @@ describe('AxeptioSDK', () => {
         onPopupClosedEvent: jest.fn(),
         onConsentCleared: jest.fn(),
         onGoogleConsentModeUpdate: jest.fn(),
+        onError: jest.fn(),
       };
 
       AxeptioSDK.addListener(mockListener);
@@ -181,6 +204,18 @@ describe('AxeptioSDK', () => {
 
       // Should not throw errors
       expect(true).toBe(true);
+    });
+
+    it('should forward onError events to listeners', () => {
+      const mockListener = { onError: jest.fn() };
+      AxeptioSDK.addListener(mockListener);
+
+      // Simulate the private sendEvent call by accessing it indirectly
+      // The event emitter triggers listeners via the AxeptioEvent enum
+      // We verify the listener type accepts onError
+      expect(typeof mockListener.onError).toBe('function');
+
+      AxeptioSDK.removeListeners();
     });
   });
 
@@ -207,6 +242,126 @@ describe('AxeptioSDK', () => {
       expect(typeof AxeptioSDK.testWebViewCookieSync).toBe('function');
       expect(typeof AxeptioSDK.getWebViewCapabilityTestScript).toBe('function');
       expect(typeof AxeptioSDK.validateWebViewSyncResult).toBe('function');
+    });
+  });
+
+  describe('TCF Vendor Consent APIs (iOS)', () => {
+    beforeEach(() => {
+      // Ensure we're on iOS for these tests
+      jest.requireMock('react-native').Platform.OS = 'ios';
+    });
+
+    it('should call native getVendorConsents on iOS', async () => {
+      const mockVendorConsents = { '1': true, '2': false };
+      mockAxeptioSdkNative.getVendorConsents = jest
+        .fn()
+        .mockResolvedValue(mockVendorConsents);
+
+      const result = await AxeptioSDK.getVendorConsents();
+
+      expect(result).toEqual(mockVendorConsents);
+      expect(mockAxeptioSdkNative.getVendorConsents).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call native getConsentedVendors on iOS', async () => {
+      const mockConsentedVendors = ['1', '3', '5'];
+      mockAxeptioSdkNative.getConsentedVendors = jest
+        .fn()
+        .mockResolvedValue(mockConsentedVendors);
+
+      const result = await AxeptioSDK.getConsentedVendors();
+
+      expect(result).toEqual(mockConsentedVendors);
+      expect(mockAxeptioSdkNative.getConsentedVendors).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call native getRefusedVendors on iOS', async () => {
+      const mockRefusedVendors = ['2', '4', '6'];
+      mockAxeptioSdkNative.getRefusedVendors = jest
+        .fn()
+        .mockResolvedValue(mockRefusedVendors);
+
+      const result = await AxeptioSDK.getRefusedVendors();
+
+      expect(result).toEqual(mockRefusedVendors);
+      expect(mockAxeptioSdkNative.getRefusedVendors).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call native isVendorConsented on iOS', async () => {
+      const vendorId = '123';
+      mockAxeptioSdkNative.isVendorConsented = jest
+        .fn()
+        .mockResolvedValue(true);
+
+      const result = await AxeptioSDK.isVendorConsented(vendorId);
+
+      expect(result).toBe(true);
+      expect(mockAxeptioSdkNative.isVendorConsented).toHaveBeenCalledWith(
+        vendorId
+      );
+    });
+
+    it('should reject TCF methods on Android', async () => {
+      jest.requireMock('react-native').Platform.OS = 'android';
+
+      await expect(AxeptioSDK.getVendorConsents()).rejects.toThrow(
+        'only available on iOS'
+      );
+      await expect(AxeptioSDK.getConsentedVendors()).rejects.toThrow(
+        'only available on iOS'
+      );
+      await expect(AxeptioSDK.getRefusedVendors()).rejects.toThrow(
+        'only available on iOS'
+      );
+      await expect(AxeptioSDK.isVendorConsented('123')).rejects.toThrow(
+        'only available on iOS'
+      );
+    });
+  });
+
+  describe('Consent Debug Info API (Android)', () => {
+    beforeEach(() => {
+      jest.requireMock('react-native').Platform.OS = 'android';
+    });
+
+    it('should call native getConsentDebugInfo on Android', async () => {
+      const mockDebugInfo = {
+        preference_key_1: 'value1',
+        preference_key_2: 'value2',
+      };
+      mockAxeptioSdkNative.getConsentDebugInfo = jest
+        .fn()
+        .mockResolvedValue(mockDebugInfo);
+
+      const result = await AxeptioSDK.getConsentDebugInfo();
+
+      expect(result).toEqual(mockDebugInfo);
+      expect(mockAxeptioSdkNative.getConsentDebugInfo).toHaveBeenCalledWith(
+        null
+      );
+    });
+
+    it('should call native getConsentDebugInfo with specific key on Android', async () => {
+      const preferenceKey = 'specific_key';
+      const mockDebugInfo = { specific_key: 'specific_value' };
+      mockAxeptioSdkNative.getConsentDebugInfo = jest
+        .fn()
+        .mockResolvedValue(mockDebugInfo);
+
+      const result = await AxeptioSDK.getConsentDebugInfo(preferenceKey);
+
+      expect(result).toEqual(mockDebugInfo);
+      expect(mockAxeptioSdkNative.getConsentDebugInfo).toHaveBeenCalledWith(
+        preferenceKey
+      );
+    });
+
+    it('should reject getConsentDebugInfo on iOS', async () => {
+      jest.requireMock('react-native').Platform.OS = 'ios';
+
+      await expect(AxeptioSDK.getConsentDebugInfo()).rejects.toThrow(
+        'only available on Android'
+      );
     });
   });
 

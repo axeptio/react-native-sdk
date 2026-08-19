@@ -9,6 +9,7 @@ import com.facebook.react.bridge.WritableMap
 import com.facebook.react.bridge.WritableNativeMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
 
+import android.content.Context
 import android.net.Uri
 import io.axept.android.googleconsent.GoogleConsentStatus
 import io.axept.android.googleconsent.GoogleConsentType
@@ -46,6 +47,12 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
         reactContext
           .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
           .emit("onConsentCleared", null)
+      }
+
+      override fun onError(message: String) {
+        reactContext
+          .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter::class.java)
+          .emit("onError", message)
       }
     }
 
@@ -95,7 +102,7 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
       if (token.isNotEmpty()) {
         AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, token, WidgetType.PRODUCTION)
       } else {
-        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, WidgetType.PRODUCTION)
+        AxeptioSDK.instance().initialize(currentActivity, axeptioService, clientId, cookiesVersion, widgetType = WidgetType.PRODUCTION)
       }
       promise.resolve(null)
     }
@@ -139,6 +146,41 @@ class AxeptioSdkModule(reactContext: ReactApplicationContext) :
     val uri = Uri.parse(url)
     var response = AxeptioSDK.instance().appendAxeptioToken(uri, token)
     promise.resolve(response.toString())
+  }
+
+  @ReactMethod
+  fun getConsentStatus(promise: Promise) {
+    try {
+      val prefs = reactApplicationContext.getSharedPreferences("axeptio", Context.MODE_PRIVATE)
+      val consentStatus = prefs.getString("axeptioConsentStatus", null)
+      promise.resolve(consentStatus)
+    } catch (e: Exception) {
+      promise.reject("GET_CONSENT_STATUS_ERROR", "Failed to get consent status: ${e.message}", e)
+    }
+  }
+
+  // MSK-93: Consent Debug Information API
+  @ReactMethod
+  fun getConsentDebugInfo(preferenceKey: String?, promise: Promise) {
+    try {
+      val debugInfo = AxeptioSDK.instance().getConsentDebugInfo(preferenceKey)
+      val writableMap = WritableNativeMap()
+
+      debugInfo.forEach { (key, value) ->
+        when (value) {
+          null -> writableMap.putNull(key)
+          is String -> writableMap.putString(key, value)
+          is Int -> writableMap.putInt(key, value)
+          is Double -> writableMap.putDouble(key, value)
+          is Boolean -> writableMap.putBoolean(key, value)
+          else -> writableMap.putString(key, value.toString())
+        }
+      }
+
+      promise.resolve(writableMap)
+    } catch (e: Exception) {
+      promise.reject("GET_CONSENT_DEBUG_INFO_ERROR", "Failed to get consent debug info: ${e.message}", e)
+    }
   }
 
   @ReactMethod

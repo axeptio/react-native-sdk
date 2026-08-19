@@ -9,17 +9,18 @@ pkill -f "node.*metro" 2>/dev/null
 
 # 2. Remove node_modules, lock files, caches
 echo "🗑 Removing node_modules, lock files, and yarn/npm cache..."
-rm -rf node_modules example/node_modules ios/Pods .expo .expo-shared .turbo
-rm -f yarn.lock package-lock.json example/yarn.lock example/package-lock.json
+rm -rf node_modules example-expo/node_modules ios/Pods .expo .expo-shared
+rm -f yarn.lock
 yarn cache clean --all
 npm cache clean --force
 
 # 3. Watchman, Metro, and Babel cache clear
 echo "🧼 Clearing Metro, Babel, & Watchman caches..."
 watchman watch-del-all 2>/dev/null
-rm -rf $TMPDIR/metro-* $TMPDIR/haste-map-* /tmp/metro-* /tmp/haste-map-* example/tmp/metro-* example/tmp/haste-map-*
-rm -rf .babel.* example/.babel.*
-rm -rf .expo example/.expo
+TMP_CACHE_DIR="${TMPDIR:-/tmp}"
+rm -rf "${TMP_CACHE_DIR%/}"/metro-* "${TMP_CACHE_DIR%/}"/haste-map-* /tmp/metro-* /tmp/haste-map-*
+rm -rf .babel.*
+rm -rf .expo example-expo/.expo
 
 # 4. Android clean (only if gradlew exists)
 if [ -d "android" ] && [ -f "android/gradlew" ]; then
@@ -30,23 +31,9 @@ if [ -d "android" ] && [ -f "android/gradlew" ]; then
   cd ..
 fi
 
-if [ -d "example/android" ] && [ -f "example/android/gradlew" ]; then
-  if [ -d "example/node_modules/@react-native/gradle-plugin" ]; then
-    echo "🧽 Cleaning Android build (example)..."
-    cd example/android
-    ./gradlew clean
-    rm -rf .gradle build
-    # Remove AARs and APKs/libs
-    rm -rf app/libs/*
-    rm -rf app/build/outputs
-    cd ../..
-  else
-    echo "⚠️ Skipping Gradle clean in example/android: plugins missing (expected after deleting node_modules)"
-  fi
-fi
 
 # 4b. Uninstall app from all connected Android devices
-APP_PACKAGE="com.axeptiosdkexample"
+APP_PACKAGE="com.axeptio.example"
 if command -v adb >/dev/null 2>&1; then
   echo "📱 Uninstalling $APP_PACKAGE from all Android devices/emulators..."
   adb devices | awk 'NR>1 && $1 {print $1}' | xargs -I{} adb -s {} uninstall $APP_PACKAGE || true
@@ -71,7 +58,7 @@ function ios_clean() {
 # Clean main ios directory
 ios_clean "ios"
 # Clean example ios directory
-ios_clean "example/ios"
+ios_clean "example-expo/ios"
 
 # Remove Xcode derived data and other cache
 echo "🧼 Removing Xcode DerivedData, xcuserdata, and other iOS caches..."
@@ -87,5 +74,5 @@ find . -name 'xcuserdata' -type d -prune -exec rm -rf {} +
 # rm -rf ~/Library/Developer/Xcode/DerivedData/SourcePackages
 
 echo "✅ Done! Now run:"
-echo "   yarn install && cd example && yarn install"
-echo "Then: npx react-native start --reset-cache"
+echo "   yarn install && cd example-expo && npm install"
+echo "Then: cd example-expo && npx expo start --clear"

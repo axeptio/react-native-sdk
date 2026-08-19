@@ -66,6 +66,7 @@ export default function App() {
       const listener: AxeptioEventListener = {
         onPopupClosedEvent: () => {
           // The CMP notice is being hidden
+          console.log('Event: onPopupClosedEvent');
           loadAd();
         },
         onConsentCleared: () => {
@@ -73,9 +74,12 @@ export default function App() {
           // Do something
           console.log('Consent cleared');
         },
+        onError: (message) => {
+          console.log('Event: onError', message);
+        },
         onGoogleConsentModeUpdate: (_consents) => {
           // The Google Consent V2 status
-          // Do something
+          console.log('Event: onGoogleConsentModeUpdate', _consents);
         },
       };
       AxeptioSDK.addListener(listener);
@@ -127,6 +131,16 @@ export default function App() {
         onPress={() => setTokenModalVisible(true)}
       >
         <Text style={styles.label}>Show webview with token</Text>
+      </Pressable>
+      <Pressable
+        style={styles.button}
+        onPress={async () => {
+          const status = await AxeptioSDK.getConsentStatus();
+          console.log('Consent Status:', status);
+          alert(`Consent Status: ${status ?? 'null (no consent yet)'}`);
+        }}
+      >
+        <Text style={styles.label}>Get Consent Status</Text>
       </Pressable>
       <TokenModal
         modalVisible={tokenModalVisible}

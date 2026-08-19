@@ -1,23 +1,17 @@
 <img src="https://github.com/user-attachments/assets/09c669ea-3187-4fc2-8763-c209d8f4cde4" width="600" height="300"/>
 
+> **⚠️ DEPRECATED**: This SDK is no longer maintained. Please use the [Axeptio Headless CMP Client](https://github.com/axeptio/headless-cmp-client) instead, which provides a React Native implementation. See the [React Native example](https://github.com/axeptio/headless-cmp-client/tree/main/examples/react-native) to get started.
+
 # Axeptio React Native SDK Integration
 
-
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg) ![React Native Compatibility](https://img.shields.io/badge/React%20Native-%3E%3D%20065-blue) ![Android SDK](https://img.shields.io/badge/Android%20SDK-%3E%3D%2026-blue) ![iOS Version](https://img.shields.io/badge/iOS%20Versions-%3E%3D%2015-blue)
-
-
-
-
-
-
-
 
 This repository demonstrates how to implement the **Axeptio React Native SDK** into your mobile applications to handle user consent for GDPR compliance and other privacy regulations.
 
 The SDK is customizable for both brands and publishers, depending on your use case and requirements.
 
-
 ## 📑 Table of Contents
+
 1. [GitHub Access Token Setup](#github-access-token-setup)
 2. [Setup](#setup)
    - [Installation](#installation)
@@ -38,14 +32,12 @@ The SDK is customizable for both brands and publishers, depending on your use ca
 11. [Events](#events)
     - [Event Source Identification](#event-source-identification)
 
-
-
-
-
-
 <br><br>
+
 ## GitHub Access Token Setup
+
 When setting up your project or accessing certain GitHub services, you may be prompted to create a GitHub Access Token. Please note that generating this token requires:
+
 - A valid **GitHub account**.
 - **Two-factor authentication (2FA)** enabled.
 
@@ -53,22 +45,32 @@ To avoid authentication issues during setup, we recommend reviewing the [officia
 Following these steps will help you generate a token smoothly and reduce onboarding friction.
 
 <br><br><br>
+
 ## Setup
+
 #### Installation
+
 To install the **Axeptio React Native SDK**, run one of the following commands:
+
 ###### Using npm:
+
 ```bash
 npm install --save @axeptio/react-native-sdk
 ```
+
 ###### Using yarn:
+
 ```bash
 yarn add @axeptio/react-native-sdk
 ```
+
 #### Android Setup
+
 - **Minimum SDK version**: 26.
 - Add the **Maven GitHub repository** and **credentials** to your **app's** `android/build.gradle` (located at the root level of your `.gradle` file).
-The snippet below is added to your `android/build.gradle` file, in the repositories block. It configures Gradle to pull the Axeptio Android SDK from a private GitHub repository.
+  The snippet below is added to your `android/build.gradle` file, in the repositories block. It configures Gradle to pull the Axeptio Android SDK from a private GitHub repository.
 - Your [GITHUB_TOKEN] scopes need [read:packages, repo]
+
 ```gradle
 allprojects {
     repositories {
@@ -86,17 +88,23 @@ allprojects {
 ```
 
 #### iOS Setup
+
 - We support **iOS versions >= 15**.
 - Run the following command to install the dependencies:
+
 ```bash
 npx pod-install
 ```
+
 You can find a basic usage of the Axeptio SDK in the [example folder](https://github.com/axeptio/react-native-sdk/tree/master/example). Please check the folder for more detailed implementation examples.
 <br><br><br>
+
 ## 🚀Initialize the SDK on App Startup
+
 To initialize the **Axeptio React Native SDK** in your app, you need to set it up when your application starts. The SDK can be configured for different use cases, such as brands or publishers, using the `AxeptioService` enum. This allows you to customize the SDK according to your specific needs (e.g., handling GDPR consent for brands or publishers).
 
 Here’s a step-by-step guide on how to initialize the SDK:
+
 ```javascript
 import AxeptioSDK, { AxeptioService } from '@axeptio/react-native-sdk';
 
@@ -105,7 +113,7 @@ async function init() {
     // Initialize the SDK with the desired service (brands or publishers)
     await AxeptioSDK.initialize(
       AxeptioService.brands, // Choose between AxeptioService.brands or AxeptioService.tcfPublishers
-      [your_client_id],      // Replace with your client ID (as provided by Axeptio)
+      [your_client_id], // Replace with your client ID (as provided by Axeptio)
       [your_cookies_version], // Replace with your current cookies version (as defined by your platform)
       [optional_consent_token] // Optional: If available, provide an existing consent token to restore previous consent choices
     );
@@ -113,26 +121,30 @@ async function init() {
     // Setup the user interface for consent management
     await AxeptioSDK.setupUI();
 
-    console.log("Axeptio SDK initialized successfully!");
+    console.log('Axeptio SDK initialized successfully!');
   } catch (error) {
-    console.error("Error initializing Axeptio SDK:", error);
+    console.error('Error initializing Axeptio SDK:', error);
   }
 }
 ```
+
 ##### Parameters:
+
 - `AxeptioService`: This enum defines the type of service you’re using:
-   - `AxeptioService.brands`: Use this for brands and advertisers. This setup is typically used for compliance with GDPR and other privacy regulations for tracking user consent.
-   - `AxeptioService.tcfPublishers`: Use this for publishers. It helps with managing user consent under the **Transparency and Consent Framework (TCF)** , which is common for handling GDPR consent in the context of digital publishing.
- - `your_client_id`: Replace this with your unique **client ID** provided by Axeptio when you set up your account. This ID identifies your organization or application in the system.
- - `your_cookies_version`: This is a version identifier for your cookies. It helps manage different cookie policies and consent flows over time. This value should be incremented when your cookie policy changes.
- - `optional_consent_token`: This token (if available) allows you to pass a previously stored consent token to restore the user's previous consent choices. This is optional, and you can skip it if it's not required.
+  - `AxeptioService.brands`: Use this for brands and advertisers. This setup is typically used for compliance with GDPR and other privacy regulations for tracking user consent.
+  - `AxeptioService.tcfPublishers`: Use this for publishers. It helps with managing user consent under the **Transparency and Consent Framework (TCF)** , which is common for handling GDPR consent in the context of digital publishing.
+- `your_client_id`: Replace this with your unique **client ID** provided by Axeptio when you set up your account. This ID identifies your organization or application in the system.
+- `your_cookies_version`: This is a version identifier for your cookies. It helps manage different cookie policies and consent flows over time. This value should be incremented when your cookie policy changes.
+- `optional_consent_token`: This token (if available) allows you to pass a previously stored consent token to restore the user's previous consent choices. This is optional, and you can skip it if it's not required.
 
 <br><br><br>
+
 ## ATT (App Tracking Transparency) Integration Note:
 
 The Axeptio SDK does not handle the user permission for tracking in the **App Tracking Transparency (ATT)** framework. It is the responsibility of your app to manage this permission and decide how the **Axeptio Consent Management Platform (CMP)** and the **ATT permission** should coexist.
 
 ###### Apple Guidelines
+
 Your app must comply with [Apple's guidelines](https://developer.apple.com/app-store/review/guidelines/#5.1.2) for disclosing the data collected by your app and requesting the user's permission for tracking.
 
 To manage ATT, you can use the [react-native-tracking-transparency](https://www.npmjs.com/package/react-native-tracking-transparency) widget.
@@ -146,23 +158,33 @@ To manage ATT, you can use the [react-native-tracking-transparency](https://www.
    You need to install the `react-native-tracking-transparency` library to handle ATT requests.
 
 Using npm:
+
 ```bash
    npm install --save react-native-tracking-transparency
- ```
+```
+
 Or using yarn:
+
 ```yarn
 yarn add react-native-tracking-transparency
 ```
+
 2. **Update `Info.plist`**:
-Add the following key to your `Info.plist` file to explain why your app requires user tracking:
+   Add the following key to your `Info.plist` file to explain why your app requires user tracking:
+
 ```xml
 <key>NSUserTrackingUsageDescription</key>
 <string>Explain why you need user tracking</string>
 ```
+
 3. **Manage the ATT Popup**:
-Before displaying the Axeptio CMP UI, you need to request ATT permission and handle the user's response. Here's how you can manage the ATT popup:
+   Before displaying the Axeptio CMP UI, you need to request ATT permission and handle the user's response. Here's how you can manage the ATT popup:
+
 ```javascript
-import { getTrackingStatus, requestTrackingPermission } from 'react-native-tracking-transparency';
+import {
+  getTrackingStatus,
+  requestTrackingPermission,
+} from 'react-native-tracking-transparency';
 
 async function handleATT() {
   // Check the current tracking status
@@ -182,17 +204,22 @@ async function handleATT() {
   }
 }
 ```
+
 <br><br><br>
+
 ## 🧑‍💻Responsibilities: Mobile App vs SDK
+
 The **Axeptio SDK** and your mobile application have distinct responsibilities when it comes to managing user consent and tracking:
 
 ##### Mobile Application Responsibilities:
+
 - Implementing and managing the **App Tracking Transparency (ATT)** permission flow.
 - Deciding when to show the **ATT** prompt in relation to the **Axeptio CMP**.
 - Properly declaring data collection practices in **App Store privacy labels**.
 - Handling SDK events and updating app behavior based on user consent.
 
 ##### Axeptio SDK Responsibilities:
+
 - Displaying the consent management platform (**CMP**) interface.
 - Managing and storing user consent choices.
 - Sending consent status through APIs.
@@ -200,10 +227,13 @@ The **Axeptio SDK** and your mobile application have distinct responsibilities w
 > **Important**: The SDK does **not** automatically handle **ATT permissions**. These must be explicitly managed by the host application, as shown in the implementation examples above.
 
 <br><br><br>
+
 ## Get Stored Consents
+
 You can retrieve the consents that are stored by the **Axeptio SDK** in **UserDefaults** (iOS) or **SharedPreferences** (Android). This allows your app to access the consent status even after the app has been closed and reopened.
 
 #### iOS (UserDefaults)
+
 For iOS, consents are stored in the **UserDefaults** system. You can use the standard `UserDefaults` API to access and retrieve the consent data.
 
 ```swift
@@ -212,26 +242,51 @@ let consentStatus = UserDefaults.standard.string(forKey: "axeptioConsentStatus")
 ```
 
 #### Android (SharedPreferences)
+
 For Android, consents are stored in **SharedPreferences**. You can access them using the standard `SharedPreferences` API to retrieve the stored consent status.
+
 ```java
 // Example for retrieving consents in Android
 SharedPreferences prefs = context.getSharedPreferences("axeptio", Context.MODE_PRIVATE);
 String consentStatus = prefs.getString("axeptioConsentStatus", "default_value");
 ```
-#### Accessing Consent Status in SDK
-The React Native SDK does not currently expose a method to directly retrieve consent data.  
-To access the stored consent values, you can read from `UserDefaults` on iOS or `SharedPreferences` on Android using a native module or a library like `react-native-default-preference`.
 
-To access UserDefaults (iOS) or SharedPreferences (Android), you can utilize the [react-native-default-preference library](https://github.com/kevinresol/react-native-default-preference), which provides a unified interface for both platforms.
+#### Accessing Consent Status in SDK
+
+```javascript
+// Get the stored consent status
+const consentStatus = await AxeptioSDK.getConsentStatus();
+console.log('Consent status:', consentStatus);
+
+// Returns null if no consent has been set yet
+if (consentStatus === null) {
+  console.log('No consent data available');
+}
+```
+
+The `getConsentStatus()` method retrieves the consent status string stored by the Axeptio SDK. This is available on both iOS and Android platforms without requiring additional dependencies.
+
+For advanced debugging or to access additional consent-related data:
+
+- iOS: Use platform-specific TCF APIs like `getVendorConsents()`, `getConsentedVendors()`, etc.
+- Android: Use `getConsentDebugInfo()` to retrieve all SharedPreferences data
+
+For manual access to platform-specific storage (advanced usage only), you can still read from `UserDefaults` on iOS or `SharedPreferences` on Android using a library like [react-native-default-preference](https://github.com/kevinresol/react-native-default-preference).
 <br><br><br>
+
 ## Show Consent Popup on Demand
+
 You can trigger the consent popup to open at any time during the app's lifecycle.
 To show the consent popup, use the following method:
+
 ```java
 AxeptioSdk.showConsentScreen();
 ```
+
 <br><br><br>
+
 ## Sharing Consents with Other Web Views
+
 This feature is available only for the **Publishers** service.
 
 The SDK provides a helper function to append the `axeptio_token` query parameter to any URL. You can either use the current user token stored in the SDK or pass a custom token.
@@ -246,7 +301,9 @@ const url = await AxeptioSdk.appendAxeptioTokenURL(
 // The resulting URL will be:
 // https://myurl.com?axeptio_token=[token]
 ```
+
 <br><br><br>
+
 ## iOS WebView Consent Synchronization
 
 ### Understanding the iOS Cookie Isolation Issue
@@ -257,8 +314,9 @@ Starting with iOS 14, Apple's WKWebView uses isolated cookie storage that doesn'
 - WebView-based implementations loading Axeptio widgets
 
 **Symptoms:**
+
 - Consent granted via native popup not recognized in WebView
-- Consent granted in WebView not recognized by native SDK  
+- Consent granted in WebView not recognized by native SDK
 - Widget not appearing on physical iOS devices (works in simulators)
 - Erratic popup behavior with dual WebView/native implementations
 
@@ -287,7 +345,7 @@ const injectionScript = await AxeptioSDK.getWebViewInjectionScript();
       console.log('Consent synchronized successfully');
     }
   }}
-/>
+/>;
 ```
 
 #### URL-based Token Synchronization
@@ -296,9 +354,11 @@ For cases where JavaScript injection isn't sufficient:
 
 ```javascript
 // Add token parameters to URL
-const tokenizedUrl = await AxeptioSDK.syncConsentWithWebView('https://your-website.com');
+const tokenizedUrl = await AxeptioSDK.syncConsentWithWebView(
+  'https://your-website.com'
+);
 
-<WebView source={{ uri: tokenizedUrl }} />
+<WebView source={{ uri: tokenizedUrl }} />;
 ```
 
 ### Optimized WebView Configuration
@@ -314,7 +374,7 @@ import AxeptioSDK from '@axeptio/react-native-sdk';
 <WebView
   {...AxeptioSDK.getWebViewProps()}
   source={{ uri: 'https://your-website.com' }}
-/>
+/>;
 ```
 
 #### Manual Configuration
@@ -325,11 +385,11 @@ import { IOSConfigUtils } from '@axeptio/react-native-sdk';
 const config = IOSConfigUtils.getOptimizedWebViewConfig();
 
 <WebView
-  incognito={config.incognito}           // false - enable cookie sharing
-  cacheEnabled={config.cacheEnabled}     // false - prevent stale consent state  
+  incognito={config.incognito} // false - enable cookie sharing
+  cacheEnabled={config.cacheEnabled} // false - prevent stale consent state
   sharedCookiesEnabled={config.sharedCookiesEnabled} // true - attempt cookie sync
   source={{ uri: 'https://your-website.com' }}
-/>
+/>;
 ```
 
 ### Troubleshooting and Diagnostics
@@ -364,16 +424,17 @@ const capabilityScript = AxeptioSDK.getWebViewCapabilityTestScript();
       console.log('WebView capabilities:', data.results);
     }
   }}
-/>
+/>;
 ```
 
 #### Common Solutions
 
 1. **Widget not appearing on iOS physical devices:**
+
    ```javascript
    // Use native-only approach on problematic iOS versions
    import { IOSConfigUtils } from '@axeptio/react-native-sdk';
-   
+
    if (IOSConfigUtils.isProblematicIOSVersion()) {
      // Show native popup instead
      AxeptioSDK.showConsentScreen();
@@ -385,6 +446,7 @@ const capabilityScript = AxeptioSDK.getWebViewCapabilityTestScript();
    ```
 
 2. **Dual WebView/Native conflicts:**
+
    ```javascript
    // Remove custom WebView implementations, use SDK methods only
    await AxeptioSDK.initialize(/* ... */);
@@ -399,15 +461,20 @@ const capabilityScript = AxeptioSDK.getWebViewCapabilityTestScript();
    - Widget-client: React 19.x (if using WebView)
 
 <br><br><br>
+
 ## Clear Users Consent Choices
+
 To clear the consent choices stored by the SDK, use the following method:
+
 ```java
 AxeptioSdk.clearConsent();
 ```
 
 This will remove all the stored consent data.
 <br><br><br>
+
 ## Events
+
 The Axeptio SDK triggers various events to notify the app when the user has taken actions related to consent.
 
 To handle these events, you can add an `AxeptioEventListener`. This allows you to react to events such as the consent popup being closed or updates to Google Consent Mode.
@@ -445,5 +512,5 @@ This tagging is handled automatically by the native SDK components used under th
 
 <br><br>
 
-For more detailed information, you can visit the [Axeptio documentation](https://support.axeptio.eu/hc/en-gb ).
+For more detailed information, you can visit the [Axeptio documentation](https://support.axeptio.eu/hc/en-gb).
 We hope this guide helps you get started with the Axeptio React Native SDK. Good luck with your integration, and thank you for choosing Axeptio!

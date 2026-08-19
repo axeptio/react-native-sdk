@@ -44,10 +44,8 @@ android.iml
 
 # Cocoapods
 #
-example/ios/Pods
 
 # Ruby
-example/vendor/
 
 # node.js
 #
@@ -81,3 +79,11 @@ lib/
 
 # tests
 .secrets
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+
+# Test coverage
+coverage/

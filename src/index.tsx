@@ -26,17 +26,45 @@ const AxeptioSdkNative = NativeModules.AxeptioSdk
       }
     );
 
-const EventEmitter = new NativeEventEmitter(AxeptioSdkNative);
-
 class AxeptioSdk {
   private listeners: AxeptioEventListener[] = [];
+  private pollingStarted = false;
 
   constructor() {
-    Object.keys(AxeptioEvent).forEach((event) => {
-      EventEmitter.addListener(event, (body: any) => {
-        this.sendEvent(event as AxeptioEvent, body);
+    if (!this.usesEventPolling()) {
+      const emitter = new NativeEventEmitter(AxeptioSdkNative);
+      Object.keys(AxeptioEvent).forEach((event) => {
+        emitter.addListener(event, (body: any) => {
+          this.sendEvent(event as AxeptioEvent, body);
+        });
       });
-    });
+    }
+  }
+
+  // On iOS, events are collected over the promise channel: the legacy
+  // RCTEventEmitter -> NativeEventEmitter delivery path never reaches the
+  // JS runtime on RN 0.86 (whichever architecture), while promise
+  // resolution is reliable. pollEvents long-polls: it resolves as soon as
+  // the native side has at least one event, and is then re-armed. The loop
+  // starts lazily with the first addListener(); until then events buffer
+  // on the native side.
+  private usesEventPolling(): boolean {
+    return (
+      Platform.OS === 'ios' && typeof AxeptioSdkNative.pollEvents === 'function'
+    );
+  }
+
+  private async startEventPolling(): Promise<void> {
+    for (;;) {
+      try {
+        const events: { name: AxeptioEvent; body?: any }[] =
+          await AxeptioSdkNative.pollEvents();
+        events.forEach((event) => this.sendEvent(event.name, event.body));
+      } catch {
+        // Native side unavailable (e.g. reload); back off before retrying.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
   }
 
   getPlaformVersion(): Promise<string> {
@@ -45,6 +73,16 @@ class AxeptioSdk {
 
   getAxeptioToken(): Promise<string> {
     return AxeptioSdkNative.getAxeptioToken();
+  }
+
+  /**
+   * Get the stored consent status
+   * Returns the consent status string stored by the Axeptio SDK
+   * Available on both iOS and Android
+   * @returns Promise resolving to consent status string, or null if not set
+   */
+  getConsentStatus(): Promise<string | null> {
+    return AxeptioSdkNative.getConsentStatus();
   }
 
   initialize(
@@ -83,6 +121,84 @@ class AxeptioSdk {
 
   appendAxeptioTokenURL(url: string, token: string): Promise<string> {
     return AxeptioSdkNative.appendAxeptioTokenURL(url, token);
+  }
+
+  // MSK-93: TCF Vendor Consent APIs (iOS only)
+
+  /**
+   * Get all vendor consent data (iOS only)
+   * Returns vendor consent information for TCF compliance
+   * @platform iOS
+   * @returns Promise resolving to vendor consents object
+   */
+  getVendorConsents(): Promise<Record<string, any>> {
+    if (Platform.OS !== 'ios') {
+      return Promise.reject(
+        new Error('getVendorConsents is only available on iOS')
+      );
+    }
+    return AxeptioSdkNative.getVendorConsents();
+  }
+
+  /**
+   * Get list of consented vendor IDs (iOS only)
+   * @platform iOS
+   * @returns Promise resolving to array of consented vendor IDs
+   */
+  getConsentedVendors(): Promise<string[]> {
+    if (Platform.OS !== 'ios') {
+      return Promise.reject(
+        new Error('getConsentedVendors is only available on iOS')
+      );
+    }
+    return AxeptioSdkNative.getConsentedVendors();
+  }
+
+  /**
+   * Get list of refused vendor IDs (iOS only)
+   * @platform iOS
+   * @returns Promise resolving to array of refused vendor IDs
+   */
+  getRefusedVendors(): Promise<string[]> {
+    if (Platform.OS !== 'ios') {
+      return Promise.reject(
+        new Error('getRefusedVendors is only available on iOS')
+      );
+    }
+    return AxeptioSdkNative.getRefusedVendors();
+  }
+
+  /**
+   * Check if a specific vendor has been consented to (iOS only)
+   * @platform iOS
+   * @param vendorId - The vendor ID to check
+   * @returns Promise resolving to true if vendor is consented, false otherwise
+   */
+  isVendorConsented(vendorId: string): Promise<boolean> {
+    if (Platform.OS !== 'ios') {
+      return Promise.reject(
+        new Error('isVendorConsented is only available on iOS')
+      );
+    }
+    return AxeptioSdkNative.isVendorConsented(vendorId);
+  }
+
+  // MSK-93: Consent Debug Information API (Android only)
+
+  /**
+   * Get comprehensive consent debug information (Android only)
+   * Combines SharedPreferences and consent file data for troubleshooting
+   * @platform Android
+   * @param preferenceKey - Optional specific preference key to query, or null for all data
+   * @returns Promise resolving to debug information map
+   */
+  getConsentDebugInfo(preferenceKey?: string): Promise<Record<string, any>> {
+    if (Platform.OS !== 'android') {
+      return Promise.reject(
+        new Error('getConsentDebugInfo is only available on Android')
+      );
+    }
+    return AxeptioSdkNative.getConsentDebugInfo(preferenceKey ?? null);
   }
 
   // SUP-277: iOS WebView synchronization methods
@@ -176,6 +292,10 @@ class AxeptioSdk {
 
   addListener(listener: AxeptioEventListener) {
     this.listeners.push(listener);
+    if (!this.pollingStarted && this.usesEventPolling()) {
+      this.pollingStarted = true;
+      this.startEventPolling();
+    }
   }
 
   removeListeners() {
@@ -187,6 +307,7 @@ enum AxeptioEvent {
   onPopupClosedEvent = 'onPopupClosedEvent',
   onConsentCleared = 'onConsentCleared',
   onGoogleConsentModeUpdate = 'onGoogleConsentModeUpdate',
+  onError = 'onError',
 }
 
 export enum AxeptioService {
@@ -198,6 +319,7 @@ export type AxeptioEventListener = {
   [AxeptioEvent.onPopupClosedEvent]?: () => void;
   [AxeptioEvent.onConsentCleared]?: () => void;
   [AxeptioEvent.onGoogleConsentModeUpdate]?: (consent: GoogleConsentV2) => void;
+  [AxeptioEvent.onError]?: (message: string) => void;
 };
 
 export type GoogleConsentV2 = {

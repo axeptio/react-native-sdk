@@ -1,0 +1,85 @@
+name: Native Build
+
+on:
+  pull_request:
+
+concurrency:
+  group: native-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Installs root dependencies too: the example's file:.. dependency runs
+      # the library's prepare script (bob build) during npm ci.
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install example dependencies
+        working-directory: example-expo
+        run: npm ci
+
+      - name: Generate android project
+        working-directory: example-expo
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Build debug APK
+        working-directory: example-expo/android
+        env:
+          # The Axeptio Android SDK resolves from GitHub Packages; GITHUB_ACTOR
+          # is a default env var, the token is not.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: ./gradlew assembleDebug --no-daemon
+
+  ios:
+    # Expo 57's ExpoModulesJSI needs Swift tools 6.2 (Xcode 26); the macos-15
+    # image defaults to Xcode 16.4 / Swift 6.1.
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Installs root dependencies too: the example's file:.. dependency runs
+      # the library's prepare script (bob build) during npm ci.
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Install example dependencies
+        working-directory: example-expo
+        run: npm ci
+
+      - name: Generate ios project
+        working-directory: example-expo
+        run: npx expo prebuild --platform ios --no-install
+
+      - name: Install pods
+        working-directory: example-expo/ios
+        run: pod install
+
+      - name: Build for iOS simulator
+        working-directory: example-expo/ios
+        # Raw xcodebuild output: xcbeautify's renderer interleaves and drops
+        # the error detail needed to diagnose CI-only failures.
+        run: |
+          xcodebuild \
+            -workspace AxeptioSdkExample.xcworkspace \
+            -scheme AxeptioSdkExample \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build
