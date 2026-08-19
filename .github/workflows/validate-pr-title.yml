@@ -1,5 +1,8 @@
 name: Validate PR Title
 
+# Inlined from axeptio/tech-scripts validate-pull-request-title.yml: this repo
+# is public and cannot call reusable workflows from the internal tech-scripts
+# repo (every run start-failed since the caller was added).
 on:
   pull_request:
     types: [opened, edited, synchronize, reopened]
@@ -10,5 +13,184 @@ permissions:
 
 jobs:
   validate:
-    name: Validate PR title
-    uses: axeptio/tech-scripts/.github/workflows/validate-pull-request-title.yml@master
+    name: Normalize and validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Normalize PR title format
+        uses: actions/github-script@v7
+        env:
+          ALLOWED_TYPES: 'build,chore,ci,docs,feat,fix,hotfix,perf,refactor,release,revert,style,test'
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const allowed = process.env.ALLOWED_TYPES.split(',').map(s => s.trim());
+            const pr = context.payload.pull_request;
+            if (!pr) return;
+
+            const original = (pr.title || '').trim();
+            let next = original;
+
+            const alreadyConventional = /^[a-z]+(\([^)]+\))?!?:\s+\S/.test(original);
+            if (alreadyConventional) {
+              core.info('Title already conventional, skipping normalization.');
+            } else {
+              const m =
+                original.match(/^([A-Za-z]+)[/\\]\s*(.+)$/) ||
+                original.match(/^([A-Za-z]+)\s*:\s*(.+)$/) ||
+                original.match(/^([A-Za-z]+)\s*[-–—]\s*(.+)$/);
+
+              if (m) {
+                const t = m[1].toLowerCase();
+                const s = m[2].trim().replace(/\s+/g, ' ');
+                if (allowed.includes(t) && s) next = `${t}: ${s}`;
+              }
+            }
+
+            if (next !== original) {
+              core.info(`Updating title: "${original}" -> "${next}"`);
+              try {
+                await github.rest.pulls.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  title: next,
+                });
+              } catch (err) {
+                core.warning(`Could not update PR title (possibly a fork PR): ${err.message}`);
+              }
+            }
+
+      - name: Enforce semantic PR title
+        uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          wip: false
+          requireScope: false
+          types: |
+            build
+            chore
+            ci
+            docs
+            feat
+            fix
+            hotfix
+            perf
+            refactor
+            release
+            revert
+            style
+            test
+
+      - name: Ensure ticket ID present and appended to title
+        id: ticket
+        uses: actions/github-script@v7
+        env:
+          TICKET_PREFIXES: 'SUP|ENG|DAT|ADM|CYB|QUA|CUS|DES|MSK'
+        with:
+          github-token: ${{ github.token }}
+          script: |
+            const pr = context.payload.pull_request;
+            if (!pr) {
+              core.setFailed('No pull_request context.');
+              return;
+            }
+
+            if (pr.user?.login === 'axeptio-bot') {
+              core.info('PR authored by axeptio-bot — skipping ticket ID requirement.');
+              return;
+            }
+
+            const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const prefixList = (process.env.TICKET_PREFIXES || '').split('|').map((s) => s.trim()).filter(Boolean);
+            if (prefixList.length === 0) {
+              core.setFailed('No valid ticket prefixes configured.');
+              return;
+            }
+            const prefixPattern = prefixList.map(escapeRegex).join('|');
+
+            const title = pr.title || '';
+            const body = pr.body || '';
+            const headRef = pr.head?.ref || '';
+            const text = `${title}\n${body}\n${headRef}`;
+
+            const re = new RegExp(`\\b(${prefixPattern})[\\s_-]*([0-9]+)\\b`, 'i');
+            const m = text.match(re);
+            if (!m) {
+              core.setFailed(`Ticket ID (e.g. ENG-123, SUP-543) not found in title, body, or branch name.`);
+              return;
+            }
+
+            const ticket = `${String(m[1]).toUpperCase()}-${m[2]}`;
+            core.setOutput('ticket', ticket);
+
+            const alreadyInTitle = new RegExp(`\\b${escapeRegex(ticket)}\\b`, 'i').test(title);
+            if (alreadyInTitle) {
+              core.info(`Ticket already present in title: ${ticket}`);
+              return;
+            }
+
+            const trailingTicketRe = new RegExp(`\\s*\\[(${prefixPattern})-\\d+\\]\\s*$`, 'i');
+            const cleaned = title.replace(trailingTicketRe, '').trim();
+            const nextTitle = `${cleaned} [${ticket}]`.trim();
+
+            try {
+              await github.rest.pulls.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                title: nextTitle,
+              });
+              core.info(`Updated PR title to include ticket: ${nextTitle}`);
+            } catch (err) {
+              core.warning(`Could not update PR title (possibly a fork PR): ${err.message}`);
+              core.setFailed(`Ticket ID found (${ticket}) but could not append it to the title.`);
+            }
+
+      - name: Verify ticket exists in Linear
+        if: steps.ticket.outputs.ticket != ''
+        uses: actions/github-script@v7
+        env:
+          LINEAR_TOKEN_RO: ${{ secrets.LINEAR_TOKEN_RO }}
+          TICKET: ${{ steps.ticket.outputs.ticket }}
+        with:
+          script: |
+            const token = process.env.LINEAR_TOKEN_RO;
+            if (!token) {
+              core.info('LINEAR_TOKEN_RO not set; skipping Linear API verification.');
+              return;
+            }
+            const ticket = process.env.TICKET;
+            const query = `query($id: String!) {
+              issue(id: $id) { id identifier title archivedAt state { name } }
+            }`;
+            let res;
+            try {
+              res = await fetch('https://api.linear.app/graphql', {
+                method: 'POST',
+                headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, variables: { id: ticket } }),
+              });
+            } catch (err) {
+              core.warning(`Linear API request failed: ${err.message}; skipping verification.`);
+              return;
+            }
+            if (!res.ok) {
+              core.warning(`Linear API returned HTTP ${res.status}; skipping verification.`);
+              return;
+            }
+            const json = await res.json();
+            if (json.errors) {
+              core.warning(`Linear API error: ${JSON.stringify(json.errors)}; skipping verification.`);
+              return;
+            }
+            const issue = json.data && json.data.issue;
+            if (!issue) {
+              core.setFailed(`Ticket ${ticket} not found in Linear.`);
+              return;
+            }
+            if (issue.archivedAt) {
+              core.warning(`Ticket ${ticket} ("${issue.title}") is archived in Linear.`);
+            } else {
+              core.info(`Verified ${issue.identifier}: "${issue.title}" (state: ${issue.state.name}).`);
+            }
