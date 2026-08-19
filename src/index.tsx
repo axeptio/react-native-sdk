@@ -26,17 +26,41 @@ const AxeptioSdkNative = NativeModules.AxeptioSdk
       }
     );
 
-const EventEmitter = new NativeEventEmitter(AxeptioSdkNative);
-
 class AxeptioSdk {
   private listeners: AxeptioEventListener[] = [];
 
   constructor() {
-    Object.keys(AxeptioEvent).forEach((event) => {
-      EventEmitter.addListener(event, (body: any) => {
-        this.sendEvent(event as AxeptioEvent, body);
+    if (
+      Platform.OS === 'ios' &&
+      typeof AxeptioSdkNative.pollEvents === 'function'
+    ) {
+      // On iOS, events are collected over the promise channel: the legacy
+      // RCTEventEmitter -> NativeEventEmitter delivery path never reaches the
+      // JS runtime on RN 0.86 (whichever architecture), while promise
+      // resolution is reliable. pollEvents long-polls: it resolves as soon as
+      // the native side has at least one event, and is then re-armed.
+      this.startEventPolling();
+    } else {
+      const emitter = new NativeEventEmitter(AxeptioSdkNative);
+      Object.keys(AxeptioEvent).forEach((event) => {
+        emitter.addListener(event, (body: any) => {
+          this.sendEvent(event as AxeptioEvent, body);
+        });
       });
-    });
+    }
+  }
+
+  private async startEventPolling(): Promise<void> {
+    for (;;) {
+      try {
+        const events: { name: AxeptioEvent; body?: any }[] =
+          await AxeptioSdkNative.pollEvents();
+        events.forEach((event) => this.sendEvent(event.name, event.body));
+      } catch {
+        // Native side unavailable (e.g. reload); back off before retrying.
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+      }
+    }
   }
 
   getPlaformVersion(): Promise<string> {
