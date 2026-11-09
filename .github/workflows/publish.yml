@@ -77,9 +77,11 @@ jobs:
 
       - name: Update package.json if needed
         id: update_package
+        env:
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
         run: |
           CURRENT_VERSION=$(node -p "require('./package.json').version")
-          TARGET_VERSION="${{ steps.version.outputs.version }}"
+          TARGET_VERSION="${VERSION_VERSION}"
           
           if [[ "$CURRENT_VERSION" != "$TARGET_VERSION" ]]; then
             echo "📝 Updating package.json from $CURRENT_VERSION to $TARGET_VERSION"
@@ -100,7 +102,7 @@ jobs:
         id: npm_check
         run: |
           PACKAGE_NAME="@axeptio/react-native-sdk"
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${VERSION_VERSION}"
           
           echo "🔍 Checking if $PACKAGE_NAME@$VERSION exists on npm..."
           
@@ -109,7 +111,7 @@ jobs:
             echo "exists=true" >> $GITHUB_OUTPUT
             
             # If workflow_dispatch, this might be intentional
-            if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ "${EVENT_NAME}" == "workflow_dispatch" ]]; then
               echo "⚠️  Note: Republishing existing version via manual trigger"
             fi
           else
@@ -118,6 +120,8 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READONLY }}
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
 
       - name: Build package
         run: |
@@ -127,8 +131,10 @@ jobs:
 
       - name: Determine npm tag
         id: npm_tag
+        env:
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${VERSION_VERSION}"
 
           # Check if version contains prerelease identifiers
           if [[ "$VERSION" =~ -beta\. ]]; then
@@ -154,22 +160,28 @@ jobs:
       - name: Publish to npm
         if: steps.npm_check.outputs.exists != 'true'
         run: |
-          echo "🚀 Publishing to npm with tag '${{ steps.npm_tag.outputs.tag }}'..."
-          npm publish --tag ${{ steps.npm_tag.outputs.tag }} --access public
-          echo "✅ Successfully published @axeptio/react-native-sdk@${{ steps.version.outputs.version }} to npm"
+          echo "🚀 Publishing to npm with tag '${NPM_TAG_TAG}'..."
+          npm publish --tag ${NPM_TAG_TAG} --access public
+          echo "✅ Successfully published @axeptio/react-native-sdk@${VERSION_VERSION} to npm"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READWRITE }}
+          NPM_TAG_TAG: ${{ steps.npm_tag.outputs.tag }}
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
 
       - name: Skip publish notification
         if: steps.npm_check.outputs.exists == 'true'
+        env:
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          echo "⏭️  Skipping npm publish - version ${{ steps.version.outputs.version }} already exists"
+          echo "⏭️  Skipping npm publish - version ${VERSION_VERSION} already exists"
           echo "To force publish a new version, update package.json version first"
 
       - name: Create/Update GitHub tag if needed
         if: steps.update_package.outputs.updated == 'true'
+        env:
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
         run: |
-          TAG_NAME="v${{ steps.version.outputs.version }}"
+          TAG_NAME="v${VERSION_VERSION}"
           
           echo "🏷️  Checking tag $TAG_NAME..."
           
@@ -185,17 +197,22 @@ jobs:
 
       - name: Summary
         if: always()
+        env:
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
+          EVENT_NAME: ${{ github.event_name }}
+          UPDATE_PACKAGE_UPDATED: ${{ steps.update_package.outputs.updated }}
+          NPM_CHECK_EXISTS: ${{ steps.npm_check.outputs.exists }}
         run: |
           echo "## 📊 Release Summary"
-          echo "- **Version**: ${{ steps.version.outputs.version }}"
+          echo "- **Version**: ${VERSION_VERSION}"
           echo "- **Package**: @axeptio/react-native-sdk"
-          echo "- **Trigger**: ${{ github.event_name }}"
-          if [[ "${{ steps.update_package.outputs.updated }}" == "true" ]]; then
+          echo "- **Trigger**: ${EVENT_NAME}"
+          if [[ "${UPDATE_PACKAGE_UPDATED}" == "true" ]]; then
             echo "- **package.json**: Updated ✅"
           else
             echo "- **package.json**: Already up-to-date ✅"
           fi
-          if [[ "${{ steps.npm_check.outputs.exists }}" == "true" ]]; then
+          if [[ "${NPM_CHECK_EXISTS}" == "true" ]]; then
             echo "- **NPM Publish**: Skipped (version exists) ⏭️"
           else
             echo "- **NPM Publish**: Success ✅"
