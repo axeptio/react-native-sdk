@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Normalize PR title format
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           ALLOWED_TYPES: 'build,chore,ci,docs,feat,fix,hotfix,perf,refactor,release,revert,style,test'
         with:
@@ -84,7 +84,7 @@ jobs:
 
       - name: Ensure ticket ID present and appended to title
         id: ticket
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           TICKET_PREFIXES: 'SUP|ENG|DAT|ADM|CYB|QUA|CUS|DES|MSK'
         with:
@@ -149,7 +149,7 @@ jobs:
 
       - name: Verify ticket exists in Linear
         if: steps.ticket.outputs.ticket != ''
-        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7.1.0
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           LINEAR_TOKEN_RO: ${{ secrets.LINEAR_TOKEN_RO }}
           TICKET: ${{ steps.ticket.outputs.ticket }}
