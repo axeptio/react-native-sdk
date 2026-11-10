@@ -27,9 +27,11 @@ jobs:
 
       - name: Determine version
         id: version
+        env:
+          VERSION_INPUT: ${{ inputs.version }}
         run: |
-          if [[ -n "${{ inputs.version }}" ]]; then
-            VERSION="${{ inputs.version }}"
+          if [[ -n "${VERSION_INPUT}" ]]; then
+            VERSION="${VERSION_INPUT}"
             echo "📝 Testing with input version: $VERSION"
           else
             VERSION=$(node -p "require('./package.json').version")
@@ -38,12 +40,14 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Check current state
+        env:
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
         run: |
           echo "## 📊 Current State"
           echo ""
           CURRENT=$(node -p "require('./package.json').version")
           echo "📦 Package.json version: $CURRENT"
-          echo "🎯 Target version: ${{ steps.version.outputs.version }}"
+          echo "🎯 Target version: ${VERSION_VERSION}"
           echo ""
           
           # Check latest git tag
@@ -52,10 +56,10 @@ jobs:
           echo ""
           
           # Check if target version tag exists
-          if git rev-parse "v${{ steps.version.outputs.version }}" >/dev/null 2>&1; then
-            echo "⚠️  Tag v${{ steps.version.outputs.version }} already exists in git"
+          if git rev-parse "v${VERSION_VERSION}" >/dev/null 2>&1; then
+            echo "⚠️  Tag v${VERSION_VERSION} already exists in git"
           else
-            echo "✅ Tag v${{ steps.version.outputs.version }} does not exist yet"
+            echo "✅ Tag v${VERSION_VERSION} does not exist yet"
           fi
 
       - name: Check if version exists on npm
@@ -63,7 +67,7 @@ jobs:
           echo "## 🔍 NPM Registry Check"
           echo ""
           PACKAGE_NAME="@axeptio/react-native-sdk"
-          VERSION="${{ steps.version.outputs.version }}"
+          VERSION="${VERSION_VERSION}"
           
           echo "Checking if $PACKAGE_NAME@$VERSION exists on npm..."
           echo ""
@@ -83,6 +87,7 @@ jobs:
           fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READONLY }}
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
 
       - name: Validate package.json
         run: |
@@ -145,28 +150,30 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_READONLY }}
 
       - name: Release simulation summary
+        env:
+          VERSION_VERSION: ${{ steps.version.outputs.version }}
         run: |
           echo "## 🎬 Release Simulation Summary"
           echo ""
           echo "### What would happen if you release now:"
           echo ""
-          echo "1. **Version**: \`${{ steps.version.outputs.version }}\` would be published"
+          echo "1. **Version**: \`${VERSION_VERSION}\` would be published"
           echo "2. **Package**: \`@axeptio/react-native-sdk\`"
           echo "3. **Registry**: npmjs.org (public)"
           echo ""
           
           CURRENT=$(node -p "require('./package.json').version")
-          if [[ "$CURRENT" != "${{ steps.version.outputs.version }}" ]]; then
-            echo "4. **package.json**: Would be updated from $CURRENT to ${{ steps.version.outputs.version }}"
-            echo "5. **Git commit**: Would create commit with message: \`chore: release v${{ steps.version.outputs.version }} [skip ci]\`"
-            echo "6. **Git tag**: Would create tag \`v${{ steps.version.outputs.version }}\`"
+          if [[ "$CURRENT" != "${VERSION_VERSION}" ]]; then
+            echo "4. **package.json**: Would be updated from $CURRENT to ${VERSION_VERSION}"
+            echo "5. **Git commit**: Would create commit with message: \`chore: release v${VERSION_VERSION} [skip ci]\`"
+            echo "6. **Git tag**: Would create tag \`v${VERSION_VERSION}\`"
           else
             echo "4. **package.json**: Already at correct version ✅"
           fi
           
           echo ""
           echo "### Next steps:"
-          echo "- If everything looks good, create a GitHub release with tag \`v${{ steps.version.outputs.version }}\`"
+          echo "- If everything looks good, create a GitHub release with tag \`v${VERSION_VERSION}\`"
           echo "- Or run the publish workflow manually from Actions tab"
           echo ""
           echo "✅ **Dry run successful** - Ready to release!"
